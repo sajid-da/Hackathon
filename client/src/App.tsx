@@ -12,6 +12,7 @@ import Profile from "@/pages/profile";
 import Dashboard from "@/pages/dashboard";
 import About from "@/pages/about";
 import Settings from "@/pages/settings";
+import TestMaps from "@/pages/test-maps";
 import NotFound from "@/pages/not-found";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
@@ -52,6 +53,7 @@ function Router() {
       <Route path="/dashboard" component={() => <ProtectedRoute component={Dashboard} />} />
       <Route path="/about" component={About} />
       <Route path="/settings" component={Settings} />
+      <Route path="/test-maps" component={TestMaps} />
       <Route component={NotFound} />
     </Switch>
   );
