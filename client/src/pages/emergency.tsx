@@ -73,6 +73,33 @@ export default function Emergency() {
         description: "Describe your situation below",
       });
     }
+    
+    // Auto-request user location when page loads for accurate responders
+    if (!userLocation && "geolocation" in navigator) {
+      console.log("[Emergency] Auto-requesting user location for accurate nearby responders...");
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+          console.log(`[Emergency] ✅ Got user location: ${position.coords.latitude.toFixed(4)}, ${position.coords.longitude.toFixed(4)}`);
+          toast({
+            title: "Location Detected",
+            description: "Showing responders near you",
+            duration: 2000,
+          });
+        },
+        (error) => {
+          console.warn("[Emergency] ⚠️ Geolocation denied/unavailable, will use fallback when needed:", error.message);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      );
+    }
   }, [toast]);
 
   useEffect(() => {
@@ -663,9 +690,17 @@ export default function Emergency() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1 }}
                     >
-                      <Card className={`p-6 hover-elevate bg-card/50 backdrop-blur-lg h-full ${
-                        index === 0 ? 'border-medical border-2' : 'border-card-border'
+                      <Card className={`p-6 hover-elevate bg-card/50 backdrop-blur-lg h-full relative ${
+                        index === 0 ? 'border-medical border-2 shadow-lg shadow-medical/50' : 'border-card-border'
                       }`}>
+                        {index === 0 && (
+                          <div className="absolute -top-3 left-4 bg-medical text-white px-4 py-1 rounded-full text-xs font-bold shadow-lg flex items-center gap-2 animate-pulse">
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+                            </svg>
+                            NEAREST RESPONDER
+                          </div>
+                        )}
                         <div className="space-y-4">
                           {index === 0 && (
                             <Badge className="bg-medical text-medical-foreground mb-2 w-full justify-center">
@@ -686,21 +721,28 @@ export default function Emergency() {
                             )}
                           </div>
 
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Navigation className="w-4 h-4" />
+                          <div className={`flex items-center gap-2 text-sm ${
+                            index === 0 ? 'text-medical font-semibold' : 'text-muted-foreground'
+                          }`}>
+                            <Navigation className={`w-4 h-4 ${index === 0 ? 'animate-pulse' : ''}`} />
                             <span>{responder.distance.toFixed(1)} km {t.distance}</span>
+                            {index === 0 && (
+                              <span className="ml-auto text-xs bg-medical/20 text-medical px-2 py-1 rounded-full">
+                                Closest
+                              </span>
+                            )}
                           </div>
 
                           {responder.phone && (
                             <Button
-                              variant="outline"
+                              variant={index === 0 ? "default" : "outline"}
                               size="sm"
-                              className="w-full"
+                              className={`w-full ${index === 0 ? 'bg-medical hover:bg-medical/90 text-white font-semibold' : ''}`}
                               onClick={() => handleCallClick(responder)}
                               data-testid={`button-call-${index}`}
                             >
                               <Phone className="w-4 h-4 mr-2" />
-                              {t.callNow}
+                              {index === 0 ? `🚨 ${t.callNow}` : t.callNow}
                             </Button>
                           )}
 

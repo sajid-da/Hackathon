@@ -53,6 +53,8 @@ ConnectAid AI is a next-generation emergency response platform that uses Google 
 - `SESSION_SECRET` - Session secret for authentication
 
 ## Recent Changes (Latest First)
+- ✅ **Nearest Responder Alert System**: Clear visual alerts on the closest responder - pulsing "NEAREST RESPONDER" badge, red border with glow effect, highlighted distance in red, priority call button with 🚨 emoji, "Closest" tag
+- ✅ **Auto Location Detection**: Automatically requests user's geolocation on page load for accurate nearby responders (with user permission)
 - ✅ **Intelligent Mock Fallback System**: Automatic fallback to comprehensive mock responder database when Places API unavailable (15 Delhi-based facilities across all 5 emergency categories)
 - ✅ **Comprehensive Multilingual Support**: Full internationalization for all UI elements (English, Hindi, Kannada, Tamil, Telugu, Spanish) with automatic language detection from user message, all buttons, labels, messages, and dialogs adapt to detected language
 - ✅ **Enhanced Geolocation**: High-accuracy geolocation (enableHighAccuracy, 10s timeout) to detect actual user location (Bangalore, Delhi, Mumbai, etc.) with clear messaging if location services disabled
