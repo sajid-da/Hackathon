@@ -5,7 +5,7 @@ ConnectAid AI is a next-generation emergency response platform that uses Google 
 
 ## Features
 - **AI-Powered Emergency Categorization**: Google Gemini 2.5 Flash analyzes emergency messages and categorizes them (medical, police, mental health, disaster, finance)
-- **India-Specific Mock Responder Database**: Comprehensive mock database with 12+ Delhi-based responders (AIIMS, Safdarjung Hospital, Delhi Police, NIMHANS, NDRF, etc.) with accurate India locations
+- **India-Specific Mock Responder Database**: Comprehensive mock database with 15 Delhi-based responders (AIIMS, Safdarjung Hospital, Delhi Police, NIMHANS, NDRF, RBI Consumer Education, etc.) with accurate India locations and phone numbers
 - **Accurate User Location**: Browser geolocation API gets real user location (defaults to Delhi if unavailable)
 - **Smart Responder Matching**: Finds 2-3 nearest facilities based on emergency type with Haversine distance calculation and priority messaging
 - **Government Warning System**: Official disclaimer on emergency page warning users this is government-affiliated and should only be used in real emergencies
@@ -56,9 +56,9 @@ ConnectAid AI is a next-generation emergency response platform that uses Google 
 - ✅ **Accurate Geolocation**: Browser geolocation API gets real user location (defaults to Delhi coordinates 28.6139, 77.2090)
 - ✅ **Government Warning**: Official disclaimer on emergency page with India emergency numbers (112, 100)
 - ✅ **Clickable Emergency Buttons**: Landing page category buttons (Medical, Police, Mental Health, Disaster, Finance) now clickable and navigate with pre-selected type
-- ✅ **Finance Category Added**: New Finance emergency category with Indian Rupee icon
+- ✅ **Finance Category Added**: New Finance emergency category with Indian Rupee icon, 3 Delhi-based responders (RBI, Consumer Disputes Commission, Financial Literacy Centre), full Gemini AI support, and amber color theme
 - ✅ Complete MVP implementation with all core features
-- ✅ Mock responder database with 12+ realistic emergency responders across all categories
+- ✅ Mock responder database with 15 realistic emergency responders across all 5 categories (medical: 3, police: 3, mental_health: 3, disaster: 3, finance: 3)
 - ✅ Smart responder search returning 2-3 nearest facilities with distance calculation
 - ✅ Priority messaging system highlighting closest responder in user's language
 - ✅ Enhanced voice output announcing both AI response and priority responder in detected language
