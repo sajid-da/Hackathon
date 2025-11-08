@@ -1,0 +1,60 @@
+Build a complete, production-ready web app called **ConnectAid AI** — a next-generation emergency response platform that uses Google Gemini, Maps, and AI voice to connect people in distress with real responders in real time.
+
+⚙️ Requirements:
+- **Frontend Framework:** React + Vite + Tailwind CSS + Framer Motion.
+- **Backend:** Node.js (Express) + Google Gemini API integration.
+- **Database:** None required for now — simulate local user DB with localStorage.
+- **AI Integration:** Use Google Gemini 1.5 Flash (text & grounding) for understanding and Google Maps API for real-world responder lookup.
+- **Voice System:** Add speech recognition and AI text-to-speech using Gemini multimodal or Web Speech API.
+- **Real-World Data:** Integrate Google Maps API & Places API to pull live responders (hospitals, police, shelters) based on user coordinates.
+
+🧩 Core Pages:
+1. **Landing Page**
+   - Cinematic animated background (Framer Motion + video overlay)
+   - Central “Get Help” button
+   - Soft glow particle effects and adaptive color schemes (red for medical, blue for police, green for mental health)
+
+2. **Emergency Flow**
+   - User can speak or type emergency details
+   - AI detects language, simplifies, translates to English internally
+   - Calls Gemini model for emergency categorization
+   - Displays nearest responders (from Google Maps API)
+   - AI gives real-time voice feedback (“I’ve found the nearest hospital, connecting now…”)
+
+3. **Profile Page**
+   - User details: name, contact, emergency contacts
+   - History of previous alerts stored locally (localStorage or mock DB)
+
+4. **Control Panel (for responders/admins)**
+   - Dashboard showing active alerts (simulated)
+   - Filter by type: medical, disaster, legal, etc.
+   - Real-time updates via WebSocket simulation
+
+🌍 Integrations:
+- **Google Gemini API:** for natural language understanding, translation, and voice generation.
+- **Google Maps API:** to locate and rank nearby emergency responders.
+- **Web Speech API:** for real-time voice input and spoken feedback.
+- **Geolocation API:** auto-detect user’s coordinates.
+
+🎨 Animation & Design:
+- Background should have a **cinematic gradient animation**, blending colors softly (e.g., deep blue → crimson → amber).
+- Use **Framer Motion** for page transitions and button micro-animations.
+- Smooth fade, parallax motion on scroll, and ambient glow particle effects.
+- Minimalist, high-contrast UI optimized for accessibility under stress.
+
+🗣 Voice Assistant Features:
+- Activate by saying “Hey ConnectAid.”
+- Convert user voice to structured text.
+- AI analyzes message with Gemini and speaks back using Gemini TTS or Web Speech API.
+- Voice playback includes ambient sound fade during responses for realism.
+
+📦 Tech Stack Summary:
+Frontend: React, Tailwind, Framer Motion, Web Speech API  
+Backend: Node.js + Express  
+AI: Google Gemini 1.5 Flash (text + grounding)  
+Maps: Google Maps JavaScript API  
+Voice: Gemini TTS / Web Speech API  
+Deployment: Dockerized setup ready for cloud deployment.
+
+🎯 Goal:
+A premium, cinematic, AI-powered emergency response app that works with real-world data and supports multilingual, voice-first accessibility — built with empathy, speed, and style.
