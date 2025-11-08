@@ -31,6 +31,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { getTranslation, detectLanguageFromText, type LanguageCode } from "@/lib/translations";
 
 export default function Emergency() {
   const [, setLocation] = useLocation();
@@ -51,6 +52,8 @@ export default function Emergency() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [callDialogOpen, setCallDialogOpen] = useState(false);
   const [selectedResponder, setSelectedResponder] = useState<Responder | null>(null);
+  const [detectedLanguage, setDetectedLanguage] = useState<LanguageCode>("en");
+  const t = getTranslation(detectedLanguage);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -92,22 +95,23 @@ export default function Emergency() {
 
       recognitionInstance.onerror = () => {
         setIsListening(false);
+        const errorMsg = getTranslation(detectedLanguage);
         toast({
-          title: "Voice recognition error",
-          description: "Please try again or type your message",
+          title: errorMsg.voiceError,
+          description: errorMsg.pleaseType,
           variant: "destructive",
         });
       };
 
       setRecognition(recognitionInstance);
     }
-  }, [toast]);
+  }, [toast, detectedLanguage]);
 
   const toggleListening = () => {
     if (!recognition) {
       toast({
-        title: "Voice not supported",
-        description: "Please type your emergency message",
+        title: t.voiceNotSupported,
+        description: t.pleaseType,
         variant: "destructive",
       });
       return;
@@ -116,11 +120,11 @@ export default function Emergency() {
     if (isListening) {
       recognition.stop();
       setIsListening(false);
-      speak("Voice input stopped. Take your time to type if you prefer.");
+      speak(t.voiceStopped, detectedLanguage);
     } else {
       recognition.start();
       setIsListening(true);
-      speak("I'm here for you. Please describe what's happening, and I'll connect you with the right help nearby.");
+      speak(t.voiceWelcome, detectedLanguage);
     }
   };
 
@@ -208,23 +212,37 @@ export default function Emergency() {
             lng: position.coords.longitude,
           });
           setIsLoadingLocation(false);
+          const locationMsg = getTranslation(detectedLanguage);
           toast({
-            title: "Location detected",
-            description: "We'll find the nearest responders",
+            title: locationMsg.locationDetected,
+            description: locationMsg.locationSuccess,
           });
         },
-        () => {
+        (error) => {
+          console.error("Geolocation error:", error);
           setIsLoadingLocation(false);
+          const locationMsg = getTranslation(detectedLanguage);
           toast({
-            title: "Location unavailable",
-            description: "Using default location (Delhi)",
+            title: locationMsg.locationRequired,
+            description: locationMsg.locationFallback,
             variant: "destructive",
           });
           setUserLocation({ lat: 28.6139, lng: 77.2090 });
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
         }
       );
     } else {
       setIsLoadingLocation(false);
+      const locationMsg = getTranslation(detectedLanguage);
+      toast({
+        title: locationMsg.locationNotSupported,
+        description: locationMsg.locationNotSupportedDesc,
+        variant: "destructive",
+      });
       setUserLocation({ lat: 28.6139, lng: 77.2090 });
     }
   };
@@ -232,19 +250,23 @@ export default function Emergency() {
   const handleSubmit = async () => {
     if (!message.trim()) {
       toast({
-        title: "Message required",
-        description: "Please describe your emergency",
+        title: t.messageRequired,
+        description: t.describeEmergency,
         variant: "destructive",
       });
       return;
     }
+
+    const lang = detectLanguageFromText(message);
+    setDetectedLanguage(lang);
 
     if (!userLocation) {
       await getLocation();
     }
 
     setStep("analyzing");
-    speak("I understand. I'm analyzing your situation now and finding the nearest help. Please stay calm and safe.");
+    const analyzingMsg = getTranslation(lang);
+    speak(analyzingMsg.analyzingDescription, lang);
 
     try {
       const response = await fetch("/api/emergency/categorize", {
@@ -435,10 +457,10 @@ export default function Emergency() {
             >
               <div className="text-center mb-12">
                 <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-                  How can we help you?
+                  {t.emergencyTitle}
                 </h1>
                 <p className="text-xl text-slate-300">
-                  Speak or type to describe your emergency
+                  {t.describeEmergency}
                 </p>
               </div>
 
@@ -449,12 +471,10 @@ export default function Emergency() {
                   </div>
                   <div className="flex-1">
                     <h3 className="text-lg font-bold text-red-300 mb-2">
-                      Official Government Emergency Service
+                      {t.governmentWarning}
                     </h3>
                     <p className="text-sm text-red-200/80 leading-relaxed">
-                      This is an official government-affiliated emergency response platform. 
-                      <strong className="text-red-100"> Use ONLY in real emergencies.</strong> Misuse of this service may result in legal consequences. 
-                      For life-threatening emergencies, always call <strong className="text-red-100">112 (India Emergency Number)</strong> or <strong className="text-red-100">100 (Police)</strong> immediately.
+                      {t.warningText}
                     </p>
                   </div>
                 </div>
@@ -466,7 +486,7 @@ export default function Emergency() {
                     <Textarea
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
-                      placeholder="Describe your emergency in detail..."
+                      placeholder={t.placeholderText}
                       className="min-h-[200px] text-lg resize-none bg-background/50"
                       data-testid="input-emergency-message"
                     />
@@ -494,12 +514,12 @@ export default function Emergency() {
                       {isListening ? (
                         <>
                           <MicOff className="w-5 h-5 mr-2" />
-                          Stop Listening
+                          {t.stopRecording}
                         </>
                       ) : (
                         <>
                           <Mic className="w-5 h-5 mr-2" />
-                          Start Voice Input
+                          {t.voiceButton}
                         </>
                       )}
                     </Button>
@@ -512,7 +532,7 @@ export default function Emergency() {
                       data-testid="button-submit-emergency"
                     >
                       <Send className="w-5 h-5 mr-2" />
-                      Send Emergency
+                      {t.submitButton}
                     </Button>
                   </div>
 
@@ -528,12 +548,12 @@ export default function Emergency() {
                       {isLoadingLocation ? (
                         <>
                           <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                          Getting Location...
+                          {t.gettingLocation}
                         </>
                       ) : (
                         <>
                           <MapPin className="w-5 h-5 mr-2" />
-                          Enable Location for Faster Response
+                          {t.enableLocation}
                         </>
                       )}
                     </Button>
@@ -561,10 +581,10 @@ export default function Emergency() {
               </motion.div>
 
               <h2 className="text-3xl font-bold text-white mb-4">
-                Analyzing Emergency
+                {t.analyzing}
               </h2>
               <p className="text-xl text-slate-300 mb-8">
-                AI is categorizing your request and finding nearby responders...
+                {t.findingHelp}
               </p>
               
               {isSpeaking && (
@@ -589,7 +609,7 @@ export default function Emergency() {
                 <div className="flex items-start justify-between mb-6">
                   <div className="flex-1">
                     <h2 className="text-3xl font-bold text-foreground mb-2">
-                      Emergency Categorized
+                      {t.guidanceTitle}
                     </h2>
                     <p className="text-lg text-muted-foreground mb-4">
                       {categorization.suggestedAction}
@@ -633,7 +653,7 @@ export default function Emergency() {
 
               <div>
                 <h3 className="text-2xl font-bold text-white mb-6">
-                  Nearest Responders
+                  {t.availableResponders}
                 </h3>
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {responders.map((responder, index) => (
@@ -668,7 +688,7 @@ export default function Emergency() {
 
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Navigation className="w-4 h-4" />
-                            <span>{responder.distance.toFixed(1)} km away</span>
+                            <span>{responder.distance.toFixed(1)} km {t.distance}</span>
                           </div>
 
                           {responder.phone && (
@@ -680,7 +700,7 @@ export default function Emergency() {
                               data-testid={`button-call-${index}`}
                             >
                               <Phone className="w-4 h-4 mr-2" />
-                              Call Now
+                              {t.callNow}
                             </Button>
                           )}
 
@@ -697,7 +717,7 @@ export default function Emergency() {
                               rel="noopener noreferrer"
                             >
                               <MapPin className="w-4 h-4 mr-2" />
-                              Get Directions
+                              {t.getDirections}
                             </a>
                           </Button>
                         </div>
@@ -738,31 +758,31 @@ export default function Emergency() {
       <AlertDialog open={callDialogOpen} onOpenChange={setCallDialogOpen}>
         <AlertDialogContent data-testid="dialog-call-confirmation">
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirm Emergency Call</AlertDialogTitle>
+            <AlertDialogTitle>{t.confirmCall}</AlertDialogTitle>
             <AlertDialogDescription className="space-y-3">
               <p className="text-base">
-                You're about to call <strong className="text-foreground">{selectedResponder?.name}</strong>.
+                {t.aboutToCall} <strong className="text-foreground">{selectedResponder?.name}</strong>.
               </p>
               <p className="text-sm">
-                This will connect you with emergency services. Please stay calm and clearly explain your situation to the responder.
+                {t.callDescription}
               </p>
               {selectedResponder && (
                 <div className="bg-muted/50 rounded-lg p-3 space-y-1 text-sm">
-                  <p><strong>Phone:</strong> {selectedResponder.phone}</p>
-                  <p><strong>Distance:</strong> {selectedResponder.distance.toFixed(1)} km away</p>
+                  <p><strong>{t.phone}:</strong> {selectedResponder.phone}</p>
+                  <p><strong>{t.distance}:</strong> {selectedResponder.distance.toFixed(1)} km</p>
                   {selectedResponder.hours && (
-                    <p><strong>Hours:</strong> {selectedResponder.hours}</p>
+                    <p><strong>{t.hours}:</strong> {selectedResponder.hours}</p>
                   )}
                 </div>
               )}
               <p className="text-sm font-medium text-foreground">
-                Help is on the way. You're doing the right thing. 💙
+                {t.helpOnWay}
               </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel data-testid="button-cancel-call">
-              Cancel
+              {t.cancel}
             </AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleCallConfirm}
@@ -770,7 +790,7 @@ export default function Emergency() {
               data-testid="button-confirm-call"
             >
               <Phone className="w-4 h-4 mr-2" />
-              Call Now
+              {t.callNow}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -5,7 +5,8 @@ ConnectAid AI is a next-generation emergency response platform that uses Google 
 
 ## Features
 - **AI-Powered Emergency Categorization**: Google Gemini 2.5 Flash analyzes emergency messages and categorizes them (medical, police, mental health, disaster, finance)
-- **India-Specific Mock Responder Database**: Comprehensive mock database with 15 Delhi-based responders (AIIMS, Safdarjung Hospital, Delhi Police, NIMHANS, NDRF, RBI Consumer Education, etc.) with accurate India locations and phone numbers
+- **Real-World Responder Search**: Google Places API integration for real nearby facilities (20km radius, India region bias)
+- **Intelligent Mock Fallback**: Comprehensive mock database with 15 Delhi-based responders (AIIMS, Safdarjung Hospital, Delhi Police, NIMHANS, NDRF, RBI Consumer Education, etc.) automatically used when Places API unavailable
 - **Accurate User Location**: Browser geolocation API gets real user location (defaults to Delhi if unavailable)
 - **Smart Responder Matching**: Finds 2-3 nearest facilities based on emergency type with Haversine distance calculation and priority messaging
 - **Government Warning System**: Official disclaimer on emergency page warning users this is government-affiliated and should only be used in real emergencies
@@ -52,7 +53,10 @@ ConnectAid AI is a next-generation emergency response platform that uses Google 
 - `SESSION_SECRET` - Session secret for authentication
 
 ## Recent Changes (Latest First)
-- ✅ **Real-World Google Places API Integration**: Replaced mock database with live Google Maps Places API for real emergency responders in India (20km radius, India region bias)
+- ✅ **Intelligent Mock Fallback System**: Automatic fallback to comprehensive mock responder database when Places API unavailable (15 Delhi-based facilities across all 5 emergency categories)
+- ✅ **Comprehensive Multilingual Support**: Full internationalization for all UI elements (English, Hindi, Kannada, Tamil, Telugu, Spanish) with automatic language detection from user message, all buttons, labels, messages, and dialogs adapt to detected language
+- ✅ **Enhanced Geolocation**: High-accuracy geolocation (enableHighAccuracy, 10s timeout) to detect actual user location (Bangalore, Delhi, Mumbai, etc.) with clear messaging if location services disabled
+- ✅ **Real-World Google Places API Integration**: Live Google Maps Places API for real emergency responders in India (20km radius, India region bias) with intelligent mock fallback
 - ✅ **Indian Voice Accents**: Updated TTS to prioritize Indian English voices (Neerja, Aditi for English; Sangeeta for Hindi) with slower rate (0.95) for empathy
 - ✅ **Animated Emergency Backgrounds**: Category-specific animations (medical: red pulse, police: blue glow, mental health: teal light, disaster: orange waves, finance: amber glow)
 - ✅ **Waveform Voice Visualization**: Real-time waveform animation synchronized with AI speech output
@@ -102,17 +106,37 @@ ConnectAid AI is a next-generation emergency response platform that uses Google 
 - **Keyboard Navigation**: All features accessible without mouse
 
 ### Multilingual Support
-- AI automatically detects user's language from emergency message
-- Gemini responds with categorization and actions in detected language
-- Text-to-speech uses detected language code for voice synthesis
-- Supported languages: English, Spanish, French, German, Chinese, Arabic, Hindi, Portuguese, Japanese, Korean, Italian, Russian, and more
-- Settings allow users to set preferred language override
+- **Automatic Language Detection**: System detects user's language from their emergency message text (supports English, Hindi, Kannada, Tamil, Telugu, Spanish)
+- **Full UI Translation**: ALL interface elements adapt to detected language:
+  - Button labels (Submit, Call Now, Get Directions, Cancel, etc.)
+  - Page titles and headings (Emergency Response, Analyzing Emergency, etc.)
+  - Instructions and descriptions (placeholder text, warnings, guidance)
+  - Dialog messages (call confirmation, government warnings)
+  - Error messages and toasts
+- **Gemini AI**: Responds with categorization and actions in detected language
+- **Text-to-Speech**: Uses detected language code for voice synthesis with Indian accent priority
+- **Translation System**: Centralized translation utility (`client/src/lib/translations.ts`) with comprehensive vocabulary for emergency response
+- **Supported Languages**:
+  - **en** (English) - Default
+  - **hi** (Hindi) - हिन्दी
+  - **kn** (Kannada) - ಕನ್ನಡ (Bangalore region)
+  - **ta** (Tamil) - தமிழ்
+  - **te** (Telugu) - తెలుగు
+  - **es** (Spanish) - Español
+
+### Location Detection
+- **High-Accuracy Geolocation**: Browser geolocation API with `enableHighAccuracy: true` for precise coordinates
+- **Automatic City Detection**: Detects user's actual city (Bangalore, Delhi, Mumbai, Chennai, Hyderabad, etc.)
+- **Real Nearby Responders**: Shows emergency services within 20km of user's actual location
+- **Timeout Handling**: 10-second timeout with clear error messaging if location unavailable
+- **Fallback Behavior**: Falls back to Delhi coordinates (28.6139, 77.2090) only if geolocation completely fails or is denied
+- **User Messaging**: Clear prompts asking users to enable location services for accurate responder matching
 
 ### User Settings (localStorage persistence)
 - **Voice**: Enable/disable, volume control
 - **Appearance**: Dark mode toggle
 - **Accessibility**: High contrast mode, reduced motion
-- **Language**: Preferred language selection (auto-detect or manual)
+- **Language**: Auto-detected from emergency message (can be overridden in Settings)
 - **Notifications**: Emergency alert preferences
 
 ### Navigation
