@@ -45,19 +45,36 @@ export default function Profile() {
         phone: userData.phone || "",
         email: userData.email || "",
         medicalInfo: userData.medicalInfo || "",
-        emergencyContacts: userData.emergencyContacts || [],
+        emergencyContacts: (userData.emergencyContacts as EmergencyContact[]) || [],
       });
+
+      const fetchAlerts = async () => {
+        try {
+          const response = await fetch(`/api/alerts/user/${userData.id}`);
+          if (response.ok) {
+            const data = await response.json();
+            setAlerts(data);
+          } else {
+            const storedAlerts = localStorage.getItem("connectaid_alerts");
+            if (storedAlerts) {
+              setAlerts(JSON.parse(storedAlerts));
+            }
+          }
+        } catch (error) {
+          const storedAlerts = localStorage.getItem("connectaid_alerts");
+          if (storedAlerts) {
+            setAlerts(JSON.parse(storedAlerts));
+          }
+        }
+      };
+
+      fetchAlerts();
     } else {
       setIsEditing(true);
     }
-
-    const storedAlerts = localStorage.getItem("connectaid_alerts");
-    if (storedAlerts) {
-      setAlerts(JSON.parse(storedAlerts));
-    }
   }, []);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formData.name || !formData.phone) {
       toast({
         title: "Required fields",
@@ -67,19 +84,57 @@ export default function Profile() {
       return;
     }
 
-    const userData = {
-      id: user?.id || crypto.randomUUID(),
-      ...formData,
-      createdAt: user?.createdAt || new Date().toISOString(),
-    };
+    try {
+      if (user?.id) {
+        const response = await fetch(`/api/users/${user.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        });
 
-    localStorage.setItem("connectaid_user", JSON.stringify(userData));
-    setUser(userData as UserType);
-    setIsEditing(false);
-    toast({
-      title: "Profile saved",
-      description: "Your information has been updated successfully",
-    });
+        if (response.ok) {
+          const updatedUser = await response.json();
+          localStorage.setItem("connectaid_user", JSON.stringify(updatedUser));
+          setUser(updatedUser);
+        } else {
+          throw new Error("Failed to update user");
+        }
+      } else {
+        const response = await fetch("/api/users", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        });
+
+        if (response.ok) {
+          const newUser = await response.json();
+          localStorage.setItem("connectaid_user", JSON.stringify(newUser));
+          setUser(newUser);
+        } else {
+          throw new Error("Failed to create user");
+        }
+      }
+
+      setIsEditing(false);
+      toast({
+        title: "Profile saved",
+        description: "Your information has been updated successfully",
+      });
+    } catch (error) {
+      console.error("Save error:", error);
+      const userData = {
+        id: user?.id || crypto.randomUUID(),
+        ...formData,
+        createdAt: user?.createdAt || new Date().toISOString(),
+      };
+      localStorage.setItem("connectaid_user", JSON.stringify(userData));
+      setUser(userData as UserType);
+      setIsEditing(false);
+      toast({
+        title: "Profile saved locally",
+        description: "Saved to device only (offline mode)",
+      });
+    }
   };
 
   const addEmergencyContact = () => {

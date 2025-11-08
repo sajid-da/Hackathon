@@ -59,16 +59,18 @@ Respond with JSON matching this schema:
           required: ["category", "severity", "keywords", "suggestedAction"],
         },
       },
-      contents: message,
+      contents: [{ role: "user", parts: [{ text: message }] }],
     });
 
     const rawJson = response.text;
+    console.log("Gemini raw response:", rawJson);
 
     if (!rawJson) {
       throw new Error("Empty response from Gemini");
     }
 
     const categorization: EmergencyCategorization = JSON.parse(rawJson);
+    console.log("Parsed categorization:", categorization);
     return categorization;
   } catch (error) {
     console.error("Gemini categorization error:", error);

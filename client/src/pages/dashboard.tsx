@@ -24,10 +24,28 @@ export default function Dashboard() {
   const [filter, setFilter] = useState<string>("all");
 
   useEffect(() => {
-    const storedAlerts = localStorage.getItem("connectaid_alerts");
-    if (storedAlerts) {
-      setAlerts(JSON.parse(storedAlerts));
-    }
+    const fetchAlerts = async () => {
+      try {
+        const response = await fetch("/api/alerts");
+        if (response.ok) {
+          const data = await response.json();
+          setAlerts(data);
+          localStorage.setItem("connectaid_alerts", JSON.stringify(data));
+        } else {
+          const storedAlerts = localStorage.getItem("connectaid_alerts");
+          if (storedAlerts) {
+            setAlerts(JSON.parse(storedAlerts));
+          }
+        }
+      } catch (error) {
+        const storedAlerts = localStorage.getItem("connectaid_alerts");
+        if (storedAlerts) {
+          setAlerts(JSON.parse(storedAlerts));
+        }
+      }
+    };
+
+    fetchAlerts();
   }, []);
 
   const filteredAlerts =

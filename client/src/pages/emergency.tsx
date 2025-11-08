@@ -166,6 +166,47 @@ export default function Emergency() {
       const respondersData = await respondersResponse.json();
       setResponders(respondersData);
 
+      const storedUser = localStorage.getItem("connectaid_user");
+      const userId = storedUser ? JSON.parse(storedUser).id : undefined;
+
+      const alertPayload = {
+        userId,
+        message,
+        category: data.category,
+        location,
+        responders: respondersData,
+      };
+
+      const alertResponse = await fetch("/api/alerts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(alertPayload),
+      });
+
+      if (alertResponse.ok) {
+        const savedAlert = await alertResponse.json();
+        const existingAlerts = localStorage.getItem("connectaid_alerts");
+        const alerts = existingAlerts ? JSON.parse(existingAlerts) : [];
+        localStorage.setItem(
+          "connectaid_alerts",
+          JSON.stringify([savedAlert, ...alerts])
+        );
+      } else {
+        console.error("Failed to save alert to backend");
+        const existingAlerts = localStorage.getItem("connectaid_alerts");
+        const alerts = existingAlerts ? JSON.parse(existingAlerts) : [];
+        const newAlert = {
+          id: crypto.randomUUID(),
+          ...alertPayload,
+          status: "active",
+          createdAt: new Date().toISOString(),
+        };
+        localStorage.setItem(
+          "connectaid_alerts",
+          JSON.stringify([newAlert, ...alerts])
+        );
+      }
+
       setStep("results");
       speak(
         `I've categorized this as a ${data.category} emergency. I found ${respondersData.length} nearby responders. ${data.suggestedAction}`

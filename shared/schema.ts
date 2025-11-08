@@ -72,11 +72,26 @@ export const insertAlertSchema = createInsertSchema(alerts).omit({
   createdAt: true,
   status: true,
 }).extend({
+  userId: z.string().optional(),
   location: z.object({
     lat: z.number(),
     lng: z.number(),
     address: z.string().optional(),
   }),
+  responders: z.array(z.object({
+    name: z.string(),
+    address: z.string(),
+    distance: z.number(),
+    type: z.string(),
+    placeId: z.string(),
+    location: z.object({
+      lat: z.number(),
+      lng: z.number(),
+      address: z.string().optional(),
+    }),
+    phone: z.string().optional(),
+    rating: z.number().optional(),
+  })).optional(),
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
