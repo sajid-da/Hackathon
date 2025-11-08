@@ -231,76 +231,74 @@ export async function findNearbyResponders(
     const keyword = categoryToKeywords[category] || "";
     
     console.log(`[Places API] Searching for ${category} near ${latitude}, ${longitude}`);
-    console.log(`[Places API] Types: ${placeTypes.join(", ")}, Keyword: ${keyword}`);
+    console.log(`[Places API] Using NEW Places API with types: ${placeTypes.join(", ")}, Keyword: ${keyword}`);
 
-    // Use Places API Nearby Search
-    const response = await axios.get(
-      "https://maps.googleapis.com/maps/api/place/nearbysearch/json",
+    // Use NEW Places API (Text Search)
+    const response = await axios.post(
+      "https://places.googleapis.com/v1/places:searchText",
       {
-        params: {
-          location: `${latitude},${longitude}`,
-          radius: 20000, // 20km radius
-          type: placeTypes[0], // Primary type
-          keyword: keyword,
-          key: GOOGLE_MAPS_API_KEY,
-          region: "in", // India region bias
+        textQuery: `${keyword} near me`,
+        locationBias: {
+          circle: {
+            center: {
+              latitude: latitude,
+              longitude: longitude
+            },
+            radius: 20000.0 // 20km
+          }
         },
+        maxResultCount: limit * 3,
+        languageCode: "en",
+        regionCode: "IN"
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": GOOGLE_MAPS_API_KEY,
+          "X-Goog-FieldMask": "places.displayName,places.formattedAddress,places.location,places.internationalPhoneNumber,places.rating,places.currentOpeningHours,places.id"
+        }
       }
     );
 
-    if (response.data.status !== "OK" && response.data.status !== "ZERO_RESULTS") {
-      console.error("[Places API] Error:", response.data.status, response.data.error_message);
-      console.log("[Places API] Falling back to mock data");
-      return getMockResponders(category, latitude, longitude, limit);
-    }
+    if (!response.data.places || response.data.places.length === 0) {
+      console.log("[Places API] No results found with NEW API, trying legacy API...");
+      
+      // Fallback to legacy API if new API returns no results
+      const legacyResponse = await axios.get(
+        "https://maps.googleapis.com/maps/api/place/nearbysearch/json",
+        {
+          params: {
+            location: `${latitude},${longitude}`,
+            radius: 20000,
+            type: placeTypes[0],
+            keyword: keyword,
+            key: GOOGLE_MAPS_API_KEY,
+            region: "in",
+          },
+        }
+      );
 
-    const places = response.data.results || [];
-    console.log(`[Places API] Found ${places.length} results`);
+      if (legacyResponse.data.status !== "OK" && legacyResponse.data.status !== "ZERO_RESULTS") {
+        console.error("[Places API] Legacy API Error:", legacyResponse.data.status, legacyResponse.data.error_message);
+        console.log("[Places API] Falling back to mock data");
+        return getMockResponders(category, latitude, longitude, limit);
+      }
 
-    if (places.length === 0) {
-      console.log("[Places API] No results found, returning empty array");
-      return [];
-    }
+      const legacyPlaces = legacyResponse.data.results || [];
+      if (legacyPlaces.length === 0) {
+        console.log("[Places API] No results from legacy API either, using mock data");
+        return getMockResponders(category, latitude, longitude, limit);
+      }
 
-    // Map and enrich results
-    const results: PlaceResult[] = await Promise.all(
-      places.slice(0, limit * 2).map(async (place: any) => {
+      // Process legacy API results
+      console.log(`[Places API] Found ${legacyPlaces.length} results from legacy API`);
+      const legacyResults: PlaceResult[] = legacyPlaces.slice(0, limit).map((place: any) => {
         const distance = calculateDistance(
           latitude,
           longitude,
           place.geometry.location.lat,
           place.geometry.location.lng
         );
-
-        // Get place details for phone number and hours
-        let phone: string | undefined;
-        let hours: string | undefined;
-
-        try {
-          const detailsResponse = await axios.get(
-            "https://maps.googleapis.com/maps/api/place/details/json",
-            {
-              params: {
-                place_id: place.place_id,
-                fields: "formatted_phone_number,opening_hours",
-                key: GOOGLE_MAPS_API_KEY,
-              },
-            }
-          );
-
-          if (detailsResponse.data.status === "OK") {
-            phone = detailsResponse.data.result.formatted_phone_number;
-            const openingHours = detailsResponse.data.result.opening_hours;
-            
-            if (openingHours) {
-              hours = openingHours.open_now 
-                ? "Open now" 
-                : openingHours.weekday_text?.[new Date().getDay()]?.replace(/\w+: /, "") || "Hours unavailable";
-            }
-          }
-        } catch (error) {
-          console.error(`[Places API] Failed to get details for ${place.name}:`, error);
-        }
 
         return {
           name: place.name,
@@ -309,14 +307,58 @@ export async function findNearbyResponders(
             lat: place.geometry.location.lat,
             lng: place.geometry.location.lng,
           },
-          phone,
+          phone: undefined,
           rating: place.rating,
-          distance: Math.round(distance * 10) / 10, // Round to 1 decimal
-          hours: hours || "24/7",
+          distance: Math.round(distance * 10) / 10,
+          hours: place.opening_hours?.open_now ? "Open now" : "24/7",
           placeId: place.place_id,
         };
-      })
-    );
+      });
+
+      return legacyResults.sort((a, b) => a.distance - b.distance);
+    }
+
+    // Process NEW Places API results
+    const places = response.data.places || [];
+    console.log(`[Places API] Found ${places.length} REAL results from NEW API`);
+
+    if (places.length === 0) {
+      console.log("[Places API] No results found from NEW API, using mock data");
+      return getMockResponders(category, latitude, longitude, limit);
+    }
+
+    // Map NEW Places API results (already includes phone, hours, etc.)
+    const results: PlaceResult[] = places.slice(0, limit).map((place: any) => {
+      const placeLat = place.location?.latitude || 0;
+      const placeLng = place.location?.longitude || 0;
+      
+      const distance = calculateDistance(
+        latitude,
+        longitude,
+        placeLat,
+        placeLng
+      );
+
+      // Extract opening hours from NEW API format
+      let hours = "24/7";
+      if (place.currentOpeningHours) {
+        hours = place.currentOpeningHours.openNow ? "Open now" : "Check hours";
+      }
+
+      return {
+        name: place.displayName?.text || place.name || "Unknown",
+        address: place.formattedAddress || "Address unavailable",
+        location: {
+          lat: placeLat,
+          lng: placeLng,
+        },
+        phone: place.internationalPhoneNumber,
+        rating: place.rating,
+        distance: Math.round(distance * 10) / 10,
+        hours: hours,
+        placeId: place.id || "unknown",
+      };
+    });
 
     // Sort by distance and return top results
     const sorted = results

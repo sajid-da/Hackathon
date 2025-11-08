@@ -6,6 +6,71 @@ import { findNearbyResponders } from "./places";
 import { insertUserSchema, insertAlertSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Test endpoint to verify Google Places API is working
+  app.get("/api/test-places", async (req, res) => {
+    try {
+      const apiKey = process.env.VITE_GOOGLE_MAPS_API_KEY;
+      if (!apiKey) {
+        return res.json({ 
+          status: "error", 
+          message: "API key not configured",
+          solution: "Set VITE_GOOGLE_MAPS_API_KEY in Secrets"
+        });
+      }
+
+      console.log("[Test] Testing Places API with key:", apiKey.substring(0, 10) + "...");
+      
+      // Test with Delhi coordinates for a hospital search
+      const testLat = 28.6139;
+      const testLng = 77.2090;
+      
+      const axios = (await import("axios")).default;
+      const response = await axios.get(
+        "https://maps.googleapis.com/maps/api/place/nearbysearch/json",
+        {
+          params: {
+            location: `${testLat},${testLng}`,
+            radius: 5000,
+            type: "hospital",
+            key: apiKey,
+          },
+        }
+      );
+
+      console.log("[Test] Places API response status:", response.data.status);
+      console.log("[Test] Results count:", response.data.results?.length || 0);
+      
+      if (response.data.status === "REQUEST_DENIED") {
+        return res.json({
+          status: "error",
+          apiStatus: response.data.status,
+          message: "Places API not enabled or billing not configured",
+          error: response.data.error_message,
+          solution: "Enable Places API in Google Cloud Console and set up billing"
+        });
+      }
+
+      res.json({
+        status: "success",
+        apiStatus: response.data.status,
+        resultsCount: response.data.results?.length || 0,
+        sampleResults: response.data.results?.slice(0, 3).map((r: any) => ({
+          name: r.name,
+          address: r.vicinity,
+          rating: r.rating
+        })) || [],
+        message: "Places API is working! You'll see real responders now."
+      });
+    } catch (error: any) {
+      console.error("[Test] Error:", error.message);
+      res.json({ 
+        status: "error", 
+        message: error.message,
+        solution: "Check API key and enable Places API"
+      });
+    }
+  });
+
   // Emergency categorization endpoint
   app.post("/api/emergency/categorize", async (req, res) => {
     try {
