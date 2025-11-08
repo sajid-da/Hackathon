@@ -1,21 +1,24 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { AlertCircle } from "lucide-react";
+import { useLocation } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Home } from "lucide-react";
 
 export default function NotFound() {
-  return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gray-50">
-      <Card className="w-full max-w-md mx-4">
-        <CardContent className="pt-6">
-          <div className="flex mb-4 gap-2">
-            <AlertCircle className="h-8 w-8 text-red-500" />
-            <h1 className="text-2xl font-bold text-gray-900">404 Page Not Found</h1>
-          </div>
+  const [, setLocation] = useLocation();
 
-          <p className="mt-4 text-sm text-gray-600">
-            Did you forget to add the page to the router?
-          </p>
-        </CardContent>
-      </Card>
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center px-4">
+      <div className="text-center">
+        <h1 className="text-9xl font-bold text-white mb-4">404</h1>
+        <p className="text-2xl text-slate-300 mb-8">Page not found</p>
+        <Button
+          size="lg"
+          onClick={() => setLocation("/")}
+          data-testid="button-home"
+        >
+          <Home className="w-4 h-4 mr-2" />
+          Return Home
+        </Button>
+      </div>
     </div>
   );
 }

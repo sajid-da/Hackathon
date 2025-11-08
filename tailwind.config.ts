@@ -11,11 +11,26 @@ export default {
         sm: ".1875rem", /* 3px */
       },
       colors: {
-        // Flat / base colors (regular buttons)
         background: "hsl(var(--background) / <alpha-value>)",
         foreground: "hsl(var(--foreground) / <alpha-value>)",
         border: "hsl(var(--border) / <alpha-value>)",
         input: "hsl(var(--input) / <alpha-value>)",
+        medical: {
+          DEFAULT: "hsl(var(--medical) / <alpha-value>)",
+          foreground: "hsl(var(--medical-foreground) / <alpha-value>)",
+        },
+        police: {
+          DEFAULT: "hsl(var(--police) / <alpha-value>)",
+          foreground: "hsl(var(--police-foreground) / <alpha-value>)",
+        },
+        mental: {
+          DEFAULT: "hsl(var(--mental) / <alpha-value>)",
+          foreground: "hsl(var(--mental-foreground) / <alpha-value>)",
+        },
+        disaster: {
+          DEFAULT: "hsl(var(--disaster) / <alpha-value>)",
+          foreground: "hsl(var(--disaster-foreground) / <alpha-value>)",
+        },
         card: {
           DEFAULT: "hsl(var(--card) / <alpha-value>)",
           foreground: "hsl(var(--card-foreground) / <alpha-value>)",
@@ -96,10 +111,33 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "pulse-glow": {
+          "0%, 100%": { transform: "scale(1)", opacity: "1" },
+          "50%": { transform: "scale(1.03)", opacity: "0.9" },
+        },
+        "gradient-shift": {
+          "0%, 100%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+        },
+        "float": {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-20px)" },
+        },
+        "ripple": {
+          "0%": { transform: "scale(0.8)", opacity: "1" },
+          "100%": { transform: "scale(2.5)", opacity: "0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "pulse-glow": "pulse-glow 2s ease-in-out infinite",
+        "gradient-shift": "gradient-shift 15s ease infinite",
+        "float": "float 6s ease-in-out infinite",
+        "ripple": "ripple 1.5s ease-out infinite",
+      },
+      backgroundSize: {
+        "300": "300%",
       },
     },
   },
