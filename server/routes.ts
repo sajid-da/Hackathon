@@ -117,12 +117,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User endpoints
   app.post("/api/users", async (req, res) => {
     try {
+      console.log("[POST /api/users] Request body:", JSON.stringify(req.body, null, 2));
       const validatedData = insertUserSchema.parse(req.body);
+      console.log("[POST /api/users] Validated data:", JSON.stringify(validatedData, null, 2));
       const user = await storage.createUser(validatedData);
+      console.log("[POST /api/users] Created user:", JSON.stringify(user, null, 2));
       res.json(user);
     } catch (error) {
-      console.error("Create user error:", error);
-      res.status(400).json({ error: "Invalid user data" });
+      console.error("[POST /api/users] Error:", error);
+      if (error instanceof Error) {
+        console.error("[POST /api/users] Error message:", error.message);
+        console.error("[POST /api/users] Error stack:", error.stack);
+      }
+      res.status(400).json({ error: "Invalid user data", details: error instanceof Error ? error.message : String(error) });
     }
   });
 

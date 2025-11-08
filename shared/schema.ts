@@ -72,6 +72,8 @@ export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
 }).extend({
+  medicalInfo: z.string().optional(),
+  email: z.string().email().optional().or(z.literal("")),
   emergencyContacts: z.array(z.object({
     name: z.string().min(1),
     phone: z.string().min(1),

@@ -26,7 +26,8 @@ export default function Login() {
 
   const createUserMutation = useMutation({
     mutationFn: async (userData: { name: string; phone: string; email?: string }) => {
-      return await apiRequest("/api/users", "POST", userData);
+      const response = await apiRequest("POST", "/api/users", userData);
+      return await response.json();
     },
     onSuccess: (user) => {
       localStorage.setItem("connectaid_user", JSON.stringify(user));
