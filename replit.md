@@ -66,6 +66,37 @@ ConnectAid AI is a next-generation emergency response platform that uses Google 
 
 ## User Preferences
 - Premium, cinematic design with high-contrast UI
-- Voice-first accessibility
+- Voice-first accessibility with multilingual support
 - Adaptive color schemes based on emergency type
 - Smooth animations and micro-interactions
+- Ethical AI principles and disability-friendly design
+- Accessibility features: high contrast mode, reduced motion, keyboard navigation, screen readers
+
+## Implementation Notes
+### Accessibility
+- **Skip to Main Content**: Keyboard users can press Tab to skip navigation
+- **Focus Indicators**: 3px outline with 2px offset on all focusable elements
+- **High Contrast Mode**: Toggle in Settings for maximum text/background contrast
+- **Reduced Motion**: Respects system preferences and user settings
+- **Screen Reader Support**: Semantic HTML, ARIA labels, proper heading hierarchy
+- **Keyboard Navigation**: All features accessible without mouse
+
+### Multilingual Support
+- AI automatically detects user's language from emergency message
+- Gemini responds with categorization and actions in detected language
+- Text-to-speech uses detected language code for voice synthesis
+- Supported languages: English, Spanish, French, German, Chinese, Arabic, Hindi, Portuguese, Japanese, Korean, Italian, Russian, and more
+- Settings allow users to set preferred language override
+
+### User Settings (localStorage persistence)
+- **Voice**: Enable/disable, volume control
+- **Appearance**: Dark mode toggle
+- **Accessibility**: High contrast mode, reduced motion
+- **Language**: Preferred language selection (auto-detect or manual)
+- **Notifications**: Emergency alert preferences
+
+### Navigation
+- Global header on all pages with Home, Emergency, Profile, Dashboard links
+- Dropdown menu with About, Settings, and replay intro animation
+- Proper semantic HTML using Button with `asChild` for accessibility
+- Active page highlighting in navigation
