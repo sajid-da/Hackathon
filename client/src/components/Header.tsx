@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Menu, Info, Settings, Home, Phone, LayoutDashboard, User } from "lucide-react";
+import { Menu, Info, Settings, Home, Phone, LayoutDashboard, User, LogOut } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -102,8 +102,23 @@ export default function Header() {
                     window.location.reload();
                   }}
                   data-testid="button-replay-intro"
+                  className="flex items-center"
                 >
                   Replay Intro Animation
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => {
+                    localStorage.removeItem("connectaid_user");
+                    localStorage.removeItem("connectaid_alerts");
+                    sessionStorage.clear();
+                    window.location.href = "/login";
+                  }}
+                  data-testid="button-logout"
+                  className="flex items-center text-destructive"
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Logout
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

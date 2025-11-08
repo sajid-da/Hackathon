@@ -24,6 +24,18 @@ export const alerts = pgTable("alerts", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const responders = pgTable("responders", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  type: text("type").notNull(),
+  address: text("address").notNull(),
+  location: jsonb("location").$type<Location>().notNull(),
+  phone: text("phone"),
+  rating: text("rating"),
+  hours: text("hours"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export interface EmergencyContact {
   name: string;
   phone: string;
@@ -94,7 +106,20 @@ export const insertAlertSchema = createInsertSchema(alerts).omit({
   })).optional(),
 });
 
+export const insertResponderSchema = createInsertSchema(responders).omit({
+  id: true,
+  createdAt: true,
+}).extend({
+  location: z.object({
+    lat: z.number(),
+    lng: z.number(),
+    address: z.string().optional(),
+  }),
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertAlert = z.infer<typeof insertAlertSchema>;
 export type Alert = typeof alerts.$inferSelect;
+export type InsertResponder = z.infer<typeof insertResponderSchema>;
+export type ResponderRecord = typeof responders.$inferSelect;

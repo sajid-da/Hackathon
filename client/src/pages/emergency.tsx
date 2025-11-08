@@ -234,10 +234,17 @@ export default function Emergency() {
       }
 
       setStep("results");
-      speak(
-        data.suggestedAction,
-        data.detectedLanguage || "en"
-      );
+      
+      const langCode = data.detectedLanguage || "en";
+      speak(data.suggestedAction, langCode);
+      
+      setTimeout(() => {
+        if (respondersData.length > 0) {
+          const priorityMsg = getPriorityMessage(langCode);
+          const responderName = respondersData[0].name;
+          speak(`${priorityMsg}. ${responderName}`, langCode);
+        }
+      }, 3000);
     } catch (error) {
       toast({
         title: "Error",
@@ -261,6 +268,24 @@ export default function Emergency() {
       default:
         return "bg-primary text-primary-foreground";
     }
+  };
+
+  const getPriorityMessage = (lang: string = "en") => {
+    const messages: Record<string, string> = {
+      en: "PRIORITY: Closest responder - immediate attention",
+      es: "PRIORIDAD: Respondedor más cercano - atención inmediata",
+      fr: "PRIORITÉ: Répondeur le plus proche - attention immédiate",
+      de: "PRIORITÄT: Nächster Retter - sofortige Aufmerksamkeit",
+      zh: "优先：最近的响应者 - 立即关注",
+      ar: "أولوية: أقرب مستجيب - اهتمام فوري",
+      hi: "प्राथमिकता: निकटतम उत्तरदाता - तत्काल ध्यान",
+      pt: "PRIORIDADE: Respondedor mais próximo - atenção imediata",
+      ja: "優先: 最寄りのレスポンダー - 即時対応",
+      ko: "우선순위: 가장 가까운 응답자 - 즉각 대응",
+      it: "PRIORITÀ: Risponditore più vicino - attenzione immediata",
+      ru: "ПРИОРИТЕТ: Ближайший специалист - немедленное внимание"
+    };
+    return messages[lang] || messages.en;
   };
 
   return (
@@ -469,8 +494,15 @@ export default function Emergency() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1 }}
                     >
-                      <Card className="p-6 hover-elevate bg-card/50 backdrop-blur-lg border-card-border h-full">
+                      <Card className={`p-6 hover-elevate bg-card/50 backdrop-blur-lg h-full ${
+                        index === 0 ? 'border-medical border-2' : 'border-card-border'
+                      }`}>
                         <div className="space-y-4">
+                          {index === 0 && (
+                            <Badge className="bg-medical text-medical-foreground mb-2 w-full justify-center">
+                              {getPriorityMessage(categorization.detectedLanguage || "en")}
+                            </Badge>
+                          )}
                           <div>
                             <h4 className="font-semibold text-lg text-foreground mb-1">
                               {responder.name}

@@ -2,7 +2,6 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { categorizeEmergency } from "./gemini";
-import { findNearbyResponders } from "./maps";
 import { insertUserSchema, insertAlertSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -32,13 +31,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Location is required" });
       }
 
-      const location = {
-        lat: parseFloat(lat as string),
-        lng: parseFloat(lng as string),
-      };
+      const latitude = parseFloat(lat as string);
+      const longitude = parseFloat(lng as string);
+      const category = type as string || "medical";
 
-      const category = type as string || "general";
-      const responders = await findNearbyResponders(location, category);
+      const responderRecords = await storage.getRespondersByType(category, latitude, longitude, 3);
+
+      const responders = responderRecords.map((record, index) => ({
+        name: record.name,
+        address: record.address,
+        distance: record.distance,
+        type: record.type,
+        placeId: record.id,
+        location: record.location,
+        phone: record.phone,
+        rating: record.rating ? parseFloat(record.rating) : undefined,
+        priority: index === 0 ? 1 : index + 1,
+        hours: record.hours,
+      }));
 
       res.json(responders);
     } catch (error) {
