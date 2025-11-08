@@ -57,10 +57,12 @@ export interface Responder {
   location: Location;
   phone?: string;
   rating?: number;
+  priority?: number;
+  hours?: string;
 }
 
 export interface EmergencyCategorization {
-  category: "medical" | "police" | "mental_health" | "disaster" | "general";
+  category: "medical" | "police" | "mental_health" | "disaster" | "finance" | "general";
   severity: "low" | "medium" | "high" | "critical";
   keywords: string[];
   suggestedAction: string;

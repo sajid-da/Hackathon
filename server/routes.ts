@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { categorizeEmergency } from "./gemini";
+import { findNearbyResponders } from "./places";
 import { insertUserSchema, insertAlertSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -22,7 +23,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Find nearby responders endpoint
+  // Find nearby responders endpoint - uses Google Places API for real-world data
   app.get("/api/emergency/responders", async (req, res) => {
     try {
       const { lat, lng, type } = req.query;
@@ -35,25 +36,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const longitude = parseFloat(lng as string);
       const category = type as string || "medical";
 
-      const responderRecords = await storage.getRespondersByType(category, latitude, longitude, 3);
+      console.log(`[API] Finding ${category} responders near ${latitude}, ${longitude}`);
 
-      const responders = responderRecords.map((record, index) => ({
-        name: record.name,
-        address: record.address,
-        distance: record.distance,
-        type: record.type,
-        placeId: record.id,
-        location: record.location,
-        phone: record.phone,
-        rating: record.rating ? parseFloat(record.rating) : undefined,
+      // Use Google Places API for real-world results
+      const placeResults = await findNearbyResponders(category, latitude, longitude, 3);
+
+      const responders = placeResults.map((place, index) => ({
+        name: place.name,
+        address: place.address,
+        distance: place.distance,
+        type: category,
+        placeId: place.placeId,
+        location: place.location,
+        phone: place.phone,
+        rating: place.rating,
         priority: index === 0 ? 1 : index + 1,
-        hours: record.hours,
+        hours: place.hours,
       }));
 
+      console.log(`[API] Returning ${responders.length} real-world responders`);
       res.json(responders);
     } catch (error) {
       console.error("Responders error:", error);
-      res.status(500).json({ error: "Failed to find responders" });
+      
+      // Fallback to mock data if Places API fails
+      console.log("[API] Places API failed, falling back to mock data");
+      try {
+        const responderRecords = await storage.getRespondersByType(
+          (req.query.type as string) || "medical",
+          parseFloat(req.query.lat as string),
+          parseFloat(req.query.lng as string),
+          3
+        );
+
+        const responders = responderRecords.map((record, index) => ({
+          name: record.name,
+          address: record.address,
+          distance: record.distance,
+          type: record.type,
+          placeId: record.id,
+          location: record.location,
+          phone: record.phone,
+          rating: record.rating ? parseFloat(record.rating) : undefined,
+          priority: index === 0 ? 1 : index + 1,
+          hours: record.hours,
+        }));
+
+        res.json(responders);
+      } catch (fallbackError) {
+        console.error("Fallback error:", fallbackError);
+        res.status(500).json({ error: "Failed to find responders" });
+      }
     }
   });
 

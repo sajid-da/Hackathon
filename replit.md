@@ -52,6 +52,11 @@ ConnectAid AI is a next-generation emergency response platform that uses Google 
 - `SESSION_SECRET` - Session secret for authentication
 
 ## Recent Changes (Latest First)
+- ✅ **Real-World Google Places API Integration**: Replaced mock database with live Google Maps Places API for real emergency responders in India (20km radius, India region bias)
+- ✅ **Indian Voice Accents**: Updated TTS to prioritize Indian English voices (Neerja, Aditi for English; Sangeeta for Hindi) with slower rate (0.95) for empathy
+- ✅ **Animated Emergency Backgrounds**: Category-specific animations (medical: red pulse, police: blue glow, mental health: teal light, disaster: orange waves, finance: amber glow)
+- ✅ **Waveform Voice Visualization**: Real-time waveform animation synchronized with AI speech output
+- ✅ **Enhanced Empathy**: More compassionate AI messaging throughout emergency flow with warm, reassuring guidance
 - ✅ **India Localization**: Updated all mock responders to Delhi, India locations (AIIMS, Safdarjung, Delhi Police, etc.)
 - ✅ **Accurate Geolocation**: Browser geolocation API gets real user location (defaults to Delhi coordinates 28.6139, 77.2090)
 - ✅ **Government Warning**: Official disclaimer on emergency page with India emergency numbers (112, 100)

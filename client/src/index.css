@@ -410,4 +410,82 @@
       font-size: 18px;
     }
   }
+
+  /* EMERGENCY BACKGROUND ANIMATIONS */
+  
+  /* Slow pulse for medical emergencies (soft red pulse) */
+  @keyframes pulse-slow {
+    0%, 100% { opacity: 0.9; }
+    50% { opacity: 1; }
+  }
+  
+  .animate-pulse-slow {
+    animation: pulse-slow 3s ease-in-out infinite;
+  }
+  
+  /* Blue glow for police emergencies */
+  @keyframes glow-blue {
+    0%, 100% { 
+      filter: brightness(0.9);
+    }
+    50% { 
+      filter: brightness(1.1);
+    }
+  }
+  
+  .animate-glow-blue {
+    animation: glow-blue 2.5s ease-in-out infinite;
+  }
+  
+  /* Teal light for mental health (calm, soothing) */
+  @keyframes glow-teal {
+    0%, 100% { 
+      filter: brightness(0.95);
+    }
+    50% { 
+      filter: brightness(1.05);
+    }
+  }
+  
+  .animate-glow-teal {
+    animation: glow-teal 4s ease-in-out infinite;
+  }
+  
+  /* Orange waves for disaster/fire emergencies */
+  @keyframes wave-orange {
+    0%, 100% { 
+      opacity: 0.9;
+      filter: brightness(0.95);
+    }
+    25% { 
+      opacity: 1;
+      filter: brightness(1.05);
+    }
+    50% { 
+      opacity: 0.95;
+      filter: brightness(1);
+    }
+    75% { 
+      opacity: 1;
+      filter: brightness(1.05);
+    }
+  }
+  
+  .animate-wave-orange {
+    animation: wave-orange 3s ease-in-out infinite;
+  }
+  
+  /* Amber glow for finance emergencies */
+  @keyframes glow-amber {
+    0%, 100% { 
+      filter: brightness(0.9);
+    }
+    50% { 
+      filter: brightness(1.05);
+    }
+  }
+  
+  .animate-glow-amber {
+    animation: glow-amber 2.8s ease-in-out infinite;
+  }
 }

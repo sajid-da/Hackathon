@@ -20,6 +20,17 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import type { EmergencyCategorization, Responder } from "@shared/schema";
 import Header from "@/components/Header";
+import WaveformAnimation from "@/components/WaveformAnimation";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function Emergency() {
   const [, setLocation] = useLocation();
@@ -37,6 +48,9 @@ export default function Emergency() {
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [recognition, setRecognition] = useState<any>(null);
   const [preSelectedType, setPreSelectedType] = useState<string | null>(null);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [callDialogOpen, setCallDialogOpen] = useState(false);
+  const [selectedResponder, setSelectedResponder] = useState<Responder | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -102,11 +116,11 @@ export default function Emergency() {
     if (isListening) {
       recognition.stop();
       setIsListening(false);
-      speak("Voice input stopped");
+      speak("Voice input stopped. Take your time to type if you prefer.");
     } else {
       recognition.start();
       setIsListening(true);
-      speak("I'm listening. Please describe your emergency.");
+      speak("I'm here for you. Please describe what's happening, and I'll connect you with the right help nearby.");
     }
   };
 
@@ -119,18 +133,20 @@ export default function Emergency() {
 
     if ("speechSynthesis" in window && voiceEnabled) {
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.9;
-      utterance.pitch = 1;
+      
+      // Indian voice configuration for warm, empathetic tone
+      utterance.rate = 0.95; // Slower rate for clarity and empathy
+      utterance.pitch = 1.0; // Warm, natural pitch
       utterance.volume = voiceVolume;
       
       const langMap: Record<string, string> = {
-        en: "en-US",
+        en: "en-IN", // Indian English
         es: "es-ES",
         fr: "fr-FR",
         de: "de-DE",
         zh: "zh-CN",
         ar: "ar-SA",
-        hi: "hi-IN",
+        hi: "hi-IN", // Hindi (India)
         pt: "pt-BR",
         ja: "ja-JP",
         ko: "ko-KR",
@@ -138,7 +154,45 @@ export default function Emergency() {
         ru: "ru-RU",
       };
 
-      utterance.lang = langMap[languageCode] || languageCode || "en-US";
+      utterance.lang = langMap[languageCode] || languageCode || "en-IN";
+      
+      // Try to select an Indian voice (Neerja, Aditi for English; Sangeeta for Hindi)
+      const voices = window.speechSynthesis.getVoices();
+      
+      if (voices.length > 0) {
+        let selectedVoice: SpeechSynthesisVoice | null = null;
+        
+        if (languageCode === "en") {
+          // Prefer Indian English voices (Neerja, Aditi, or any en-IN voice)
+          selectedVoice = voices.find(v => 
+            v.name.toLowerCase().includes("neerja") || 
+            v.name.toLowerCase().includes("aditi") ||
+            v.lang.startsWith("en-IN")
+          ) || voices.find(v => v.lang.startsWith("en-IN")) || null;
+        } else if (languageCode === "hi") {
+          // Prefer Hindi voices (Sangeeta or any hi-IN voice)
+          selectedVoice = voices.find(v => 
+            v.name.toLowerCase().includes("sangeeta") ||
+            v.lang.startsWith("hi-IN")
+          ) || voices.find(v => v.lang.startsWith("hi-IN")) || null;
+        } else {
+          // For other languages, find matching voice
+          const targetLang = langMap[languageCode] || languageCode;
+          selectedVoice = voices.find(v => v.lang.startsWith(targetLang.split("-")[0])) || null;
+        }
+        
+        if (selectedVoice) {
+          utterance.voice = selectedVoice;
+          console.log(`[TTS] Using voice: ${selectedVoice.name} (${selectedVoice.lang})`);
+        } else {
+          console.log(`[TTS] No specific voice found, using default for ${utterance.lang}`);
+        }
+      }
+      
+      // Track speaking state for waveform animation
+      utterance.onstart = () => setIsSpeaking(true);
+      utterance.onend = () => setIsSpeaking(false);
+      utterance.onerror = () => setIsSpeaking(false);
       
       window.speechSynthesis.speak(utterance);
     }
@@ -190,7 +244,7 @@ export default function Emergency() {
     }
 
     setStep("analyzing");
-    speak("Analyzing your emergency. Please hold on.");
+    speak("I understand. I'm analyzing your situation now and finding the nearest help. Please stay calm and safe.");
 
     try {
       const response = await fetch("/api/emergency/categorize", {
@@ -264,7 +318,8 @@ export default function Emergency() {
         if (respondersData.length > 0) {
           const priorityMsg = getPriorityMessage(langCode);
           const responderName = respondersData[0].name;
-          speak(`${priorityMsg}. ${responderName}`, langCode);
+          const distance = respondersData[0].distance?.toFixed(1) || "nearby";
+          speak(`Help is very close. ${responderName} is just ${distance} kilometers away. ${priorityMsg}. You can call them now or get directions.`, langCode);
         }
       }, 3000);
     } catch (error) {
@@ -312,10 +367,44 @@ export default function Emergency() {
     return messages[lang] || messages.en;
   };
 
+  const handleCallClick = (responder: Responder) => {
+    setSelectedResponder(responder);
+    setCallDialogOpen(true);
+  };
+
+  const handleCallConfirm = () => {
+    if (selectedResponder?.phone) {
+      window.location.href = `tel:${selectedResponder.phone}`;
+    }
+    setCallDialogOpen(false);
+    setSelectedResponder(null);
+  };
+
+  const getAnimatedBackground = () => {
+    if (!categorization || step === "input") {
+      return "bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950";
+    }
+    
+    switch (categorization.category) {
+      case "medical":
+        return "bg-gradient-to-br from-red-950/90 via-slate-900 to-slate-950 animate-pulse-slow";
+      case "police":
+        return "bg-gradient-to-br from-blue-950/90 via-slate-900 to-slate-950 animate-glow-blue";
+      case "mental_health":
+        return "bg-gradient-to-br from-teal-950/90 via-slate-900 to-slate-950 animate-glow-teal";
+      case "disaster":
+        return "bg-gradient-to-br from-orange-950/90 via-slate-900 to-slate-950 animate-wave-orange";
+      case "finance":
+        return "bg-gradient-to-br from-amber-950/90 via-slate-900 to-slate-950 animate-glow-amber";
+      default:
+        return "bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950";
+    }
+  };
+
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 pt-16">
+      <div className={`min-h-screen ${getAnimatedBackground()} pt-16 transition-colors duration-1000`}>
         <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <Button
@@ -477,6 +566,14 @@ export default function Emergency() {
               <p className="text-xl text-slate-300 mb-8">
                 AI is categorizing your request and finding nearby responders...
               </p>
+              
+              {isSpeaking && (
+                <div className="mb-6 flex flex-col items-center gap-3">
+                  <p className="text-sm text-slate-400">AI Speaking</p>
+                  <WaveformAnimation isAnimating={true} bars={7} barColor="#ef4444" />
+                </div>
+              )}
+              
               <Progress value={66} className="max-w-md mx-auto" />
             </motion.div>
           )}
@@ -490,13 +587,23 @@ export default function Emergency() {
             >
               <Card className="p-8 bg-card/50 backdrop-blur-lg border-card-border">
                 <div className="flex items-start justify-between mb-6">
-                  <div>
+                  <div className="flex-1">
                     <h2 className="text-3xl font-bold text-foreground mb-2">
                       Emergency Categorized
                     </h2>
-                    <p className="text-lg text-muted-foreground">
+                    <p className="text-lg text-muted-foreground mb-4">
                       {categorization.suggestedAction}
                     </p>
+                    {isSpeaking && (
+                      <div className="flex items-center gap-3 bg-muted/30 rounded-lg p-3 mt-4">
+                        <WaveformAnimation 
+                          isAnimating={true} 
+                          bars={5} 
+                          barColor="hsl(var(--foreground))" 
+                        />
+                        <span className="text-sm text-muted-foreground">AI providing guidance...</span>
+                      </div>
+                    )}
                   </div>
                   <Badge
                     className={`text-base px-4 py-2 ${getCategoryColor(categorization.category)}`}
@@ -549,9 +656,14 @@ export default function Emergency() {
                             <h4 className="font-semibold text-lg text-foreground mb-1">
                               {responder.name}
                             </h4>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-sm text-muted-foreground mb-2">
                               {responder.address}
                             </p>
+                            {responder.hours && (
+                              <p className="text-xs text-muted-foreground">
+                                {responder.hours}
+                              </p>
+                            )}
                           </div>
 
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -564,12 +676,11 @@ export default function Emergency() {
                               variant="outline"
                               size="sm"
                               className="w-full"
-                              asChild
+                              onClick={() => handleCallClick(responder)}
+                              data-testid={`button-call-${index}`}
                             >
-                              <a href={`tel:${responder.phone}`}>
-                                <Phone className="w-4 h-4 mr-2" />
-                                Call Now
-                              </a>
+                              <Phone className="w-4 h-4 mr-2" />
+                              Call Now
                             </Button>
                           )}
 
@@ -623,6 +734,47 @@ export default function Emergency() {
         </AnimatePresence>
       </div>
     </div>
+
+      <AlertDialog open={callDialogOpen} onOpenChange={setCallDialogOpen}>
+        <AlertDialogContent data-testid="dialog-call-confirmation">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Emergency Call</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3">
+              <p className="text-base">
+                You're about to call <strong className="text-foreground">{selectedResponder?.name}</strong>.
+              </p>
+              <p className="text-sm">
+                This will connect you with emergency services. Please stay calm and clearly explain your situation to the responder.
+              </p>
+              {selectedResponder && (
+                <div className="bg-muted/50 rounded-lg p-3 space-y-1 text-sm">
+                  <p><strong>Phone:</strong> {selectedResponder.phone}</p>
+                  <p><strong>Distance:</strong> {selectedResponder.distance.toFixed(1)} km away</p>
+                  {selectedResponder.hours && (
+                    <p><strong>Hours:</strong> {selectedResponder.hours}</p>
+                  )}
+                </div>
+              )}
+              <p className="text-sm font-medium text-foreground">
+                Help is on the way. You're doing the right thing. 💙
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-cancel-call">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleCallConfirm}
+              className="bg-medical hover:bg-medical/90"
+              data-testid="button-confirm-call"
+            >
+              <Phone className="w-4 h-4 mr-2" />
+              Call Now
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

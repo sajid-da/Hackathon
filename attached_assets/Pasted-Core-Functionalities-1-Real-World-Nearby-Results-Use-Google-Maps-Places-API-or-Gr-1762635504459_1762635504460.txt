@@ -1,0 +1,73 @@
+Core Functionalities:
+1. **Real-World Nearby Results**
+   - Use **Google Maps Places API** or **Grounding Tools** to fetch *real-time nearby emergency responders*.
+   - Location should be determined automatically from browser geolocation (navigator.geolocation).
+   - Query example:
+     ```
+     Find hospitals, police stations, and fire stations within 20 km of latitude={user.lat}, longitude={user.lng} in India only.
+     Return verified institutions, prioritize .gov, .org, and NABH-accredited hospitals.
+     ```
+   - If the model uses Gemini grounding, include `locationBias: "IP_BIAS"` and `radiusMeters: 20000`.
+
+2. **Localized AI Voice Output**
+   - Replace default TTS with an **Indian human-like voice**, such as:
+     - “Neerja” or “Aditi” for Indian English
+     - “Sangeeta” for Hindi
+   - Use natural pauses, empathy, and warmth.
+   - Example: “I understand. Help is on the way. Please stay calm and move to a safe area.”
+
+3. **User Interface Design**
+   - Cinematic, smooth interface (React + Tailwind + Framer Motion).
+   - Add animated background matching emergency type:
+     - Medical → soft red pulse
+     - Police → deep blue glow
+     - Fire → orange gradient waves
+     - Mental Health → calm teal light
+   - Include a large central “Get Help” button with glowing pulse animation.
+   - When AI speaks, display waveform animation synchronized with voice.
+
+4. **AI Behavior**
+   - Detect user language automatically (Hindi, English, Tamil, etc.)
+   - Translate user input to English internally.
+   - Categorize the emergency correctly (Medical, Fire, Legal, etc.)
+   - Fetch **only local results within India**, using Google Maps/Places or OpenStreetMap APIs.
+   - Provide real-time distance and name of the nearest help center in kilometers, not miles.
+
+5. **Speech Interaction**
+   - Use **Web Speech Recognition API** for input.
+   - Use **Google TTS or ElevenLabs India Voice** for output with warm tone.
+   - Example configuration:
+     ```
+     speechConfig: {
+       voice: "en-IN-NeerjaNeural",
+       style: "calm",
+       pitch: 1.0,
+       rate: 0.95
+     }
+     ```
+
+6. **Response Flow**
+   - “Hey ConnectAid” activates the AI assistant.
+   - AI listens → detects intent → fetches nearest responders → gives verbal + visual guidance.
+   - Example:
+     - User: “Someone fainted near me.”
+     - AI: “It sounds like a medical emergency. The nearest hospital is 2.3 kilometers away at Fortis Mumbai. Would you like me to call them?”
+
+7. **Accuracy Layer**
+   - Prioritize India-specific data sources (Google Maps India, NDMA, local police databases).
+   - If location fails, ask: “Can you please share your city or PIN code?”
+
+8. **Tech Stack**
+   - Frontend: React + Tailwind + Framer Motion
+   - AI: Google Gemini API (with proper geolocation grounding)
+   - Voice: Web Speech API + Indian TTS (Google, Azure, or ElevenLabs)
+   - Maps: Google Maps API / Places API (region=IN)
+   - Backend (optional): Node.js + Express for proxying requests
+
+🎯 Expected Output:
+A web-based emergency AI assistant that:
+- Detects the user’s location in India
+- Lists nearby real responders (within 20 km)
+- Responds in soothing, Indian-accented voice
+- Speaks empathetically and reacts visually
+- Never shows irrelevant international data
