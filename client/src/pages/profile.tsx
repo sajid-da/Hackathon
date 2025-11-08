@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { User as UserType, Alert, EmergencyContact } from "@shared/schema";
+import Header from "@/components/Header";
 
 export default function Profile() {
   const [, setLocation] = useLocation();
@@ -182,8 +183,10 @@ export default function Profile() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <>
+      <Header />
+      <div className="min-h-screen bg-background pt-16">
+        <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <Button
             variant="ghost"
@@ -454,5 +457,6 @@ export default function Profile() {
         </div>
       </div>
     </div>
+    </>
   );
 }

@@ -301,4 +301,113 @@
   .border.hover-elevate:not(.no-hover-interaction-elevate)::after {
     inset: -1px;
   }
+
+  /* ACCESSIBILITY IMPROVEMENTS */
+  
+  /* Enhanced focus indicators for keyboard navigation */
+  *:focus-visible {
+    outline: 3px solid hsl(var(--ring));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Skip to main content link */
+  .skip-to-main {
+    position: absolute;
+    left: -9999px;
+    z-index: 9999;
+    padding: 1rem;
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    text-decoration: none;
+    border-radius: 4px;
+  }
+
+  .skip-to-main:focus {
+    left: 1rem;
+    top: 1rem;
+  }
+
+  /* Screen reader only content */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  /* HIGH CONTRAST MODE */
+  .high-contrast {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    --border: 0 0% 0%;
+    --card-border: 0 0% 0%;
+    --primary: 345 100% 40%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 10% 15%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 220 10% 90%;
+    --muted-foreground: 0 0% 0%;
+    --accent: 220 15% 20%;
+    --accent-foreground: 0 0% 100%;
+  }
+
+  .high-contrast.dark {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 100%;
+    --border: 0 0% 100%;
+    --card-border: 0 0% 100%;
+    --primary: 345 100% 60%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 220 10% 85%;
+    --secondary-foreground: 0 0% 0%;
+    --muted: 220 10% 20%;
+    --muted-foreground: 0 0% 100%;
+    --accent: 220 15% 80%;
+    --accent-foreground: 0 0% 0%;
+  }
+
+  /* REDUCED MOTION SUPPORT */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* For users who have reduced motion enabled in settings */
+  .reduce-motion *,
+  .reduce-motion *::before,
+  .reduce-motion *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /* Ensure text remains readable at all zoom levels */
+  @media (min-width: 320px) {
+    html {
+      font-size: 16px;
+    }
+  }
+
+  /* Large text for better readability */
+  @media (min-width: 1400px) {
+    html {
+      font-size: 18px;
+    }
+  }
 }

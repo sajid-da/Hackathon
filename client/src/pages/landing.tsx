@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Heart, Shield, Brain, AlertTriangle } from "lucide-react";
+import Header from "@/components/Header";
 
 export default function Landing() {
   const [, setLocation] = useLocation();
@@ -15,7 +16,9 @@ export default function Landing() {
   }));
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
+    <>
+      <Header />
+      <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
       <div
         className="absolute inset-0 bg-gradient-to-br from-blue-900/30 via-red-900/20 to-amber-900/30 animate-gradient-shift bg-300"
         style={{
@@ -182,5 +185,6 @@ export default function Landing() {
         </motion.div>
       </div>
     </div>
+    </>
   );
 }

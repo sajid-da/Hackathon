@@ -17,6 +17,7 @@ import {
   Activity,
 } from "lucide-react";
 import type { Alert } from "@shared/schema";
+import Header from "@/components/Header";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
@@ -92,8 +93,10 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <>
+      <Header />
+      <div className="min-h-screen bg-background pt-16">
+        <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <Button
             variant="ghost"
@@ -267,5 +270,6 @@ export default function Dashboard() {
         </Tabs>
       </div>
     </div>
+    </>
   );
 }

@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { EmergencyCategorization, Responder } from "@shared/schema";
+import Header from "@/components/Header";
 
 export default function Emergency() {
   const [, setLocation] = useLocation();
@@ -87,11 +88,36 @@ export default function Emergency() {
     }
   };
 
-  const speak = (text: string) => {
-    if ("speechSynthesis" in window) {
+  const speak = (text: string, languageCode: string = "en") => {
+    const settings = localStorage.getItem("connectaid_settings");
+    const voiceEnabled = settings
+      ? JSON.parse(settings).voiceEnabled !== false
+      : true;
+    const voiceVolume = settings ? JSON.parse(settings).voiceVolume / 100 : 0.8;
+
+    if ("speechSynthesis" in window && voiceEnabled) {
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = 0.9;
       utterance.pitch = 1;
+      utterance.volume = voiceVolume;
+      
+      const langMap: Record<string, string> = {
+        en: "en-US",
+        es: "es-ES",
+        fr: "fr-FR",
+        de: "de-DE",
+        zh: "zh-CN",
+        ar: "ar-SA",
+        hi: "hi-IN",
+        pt: "pt-BR",
+        ja: "ja-JP",
+        ko: "ko-KR",
+        it: "it-IT",
+        ru: "ru-RU",
+      };
+
+      utterance.lang = langMap[languageCode] || languageCode || "en-US";
+      
       window.speechSynthesis.speak(utterance);
     }
   };
@@ -209,7 +235,8 @@ export default function Emergency() {
 
       setStep("results");
       speak(
-        `I've categorized this as a ${data.category} emergency. I found ${respondersData.length} nearby responders. ${data.suggestedAction}`
+        data.suggestedAction,
+        data.detectedLanguage || "en"
       );
     } catch (error) {
       toast({
@@ -237,8 +264,10 @@ export default function Emergency() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <>
+      <Header />
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 pt-16">
+        <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <Button
             variant="ghost"
@@ -520,5 +549,6 @@ export default function Emergency() {
         </AnimatePresence>
       </div>
     </div>
+    </>
   );
 }

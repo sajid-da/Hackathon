@@ -49,6 +49,12 @@ ConnectAid AI is a next-generation emergency response platform that uses Google 
 ## Recent Changes
 - ✅ Complete MVP implementation with all core features
 - ✅ Google Gemini AI emergency categorization (verified working via logs and tests)
+- ✅ Cinematic splash screen with animated logo intro (slides in and unblurs)
+- ✅ Global navigation header with dropdown menu (About, Settings)
+- ✅ Enhanced multilingual support - AI detects language and responds in user's language
+- ✅ Multilingual text-to-speech with automatic language detection
+- ✅ Settings page with voice, appearance, and accessibility preferences
+- ✅ About page with mission statement and feature highlights
 - ✅ Google Maps/Places API responder location (requires Places API (New) enablement in Google Cloud Console)
 - ✅ Web Speech API for voice recognition and text-to-speech
 - ✅ Cinematic UI with Framer Motion animations and particle effects
