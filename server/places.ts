@@ -223,8 +223,8 @@ export async function findNearbyResponders(
 ): Promise<PlaceResult[]> {
   try {
     if (!GOOGLE_MAPS_API_KEY) {
-      console.warn("[Places API] Google Maps API key not configured, using mock data");
-      return getMockResponders(category, latitude, longitude, limit);
+      console.warn("[Places API] Google Maps API key not configured, returning empty to trigger Gemini search");
+      return [];
     }
 
     const placeTypes = categoryToPlaceTypes[category] || ["hospital"];
@@ -280,14 +280,14 @@ export async function findNearbyResponders(
 
       if (legacyResponse.data.status !== "OK" && legacyResponse.data.status !== "ZERO_RESULTS") {
         console.error("[Places API] Legacy API Error:", legacyResponse.data.status, legacyResponse.data.error_message);
-        console.log("[Places API] Falling back to mock data");
-        return getMockResponders(category, latitude, longitude, limit);
+        console.log("[Places API] Returning empty to trigger Gemini web search");
+        return [];
       }
 
       const legacyPlaces = legacyResponse.data.results || [];
       if (legacyPlaces.length === 0) {
-        console.log("[Places API] No results from legacy API either, using mock data");
-        return getMockResponders(category, latitude, longitude, limit);
+        console.log("[Places API] No results from legacy API either, returning empty for Gemini search");
+        return [];
       }
 
       // Process legacy API results
@@ -323,8 +323,8 @@ export async function findNearbyResponders(
     console.log(`[Places API] Found ${places.length} REAL results from NEW API`);
 
     if (places.length === 0) {
-      console.log("[Places API] No results found from NEW API, using mock data");
-      return getMockResponders(category, latitude, longitude, limit);
+      console.log("[Places API] No results found from NEW API, returning empty for Gemini search");
+      return [];
     }
 
     // Map NEW Places API results (already includes phone, hours, etc.)
@@ -369,7 +369,7 @@ export async function findNearbyResponders(
     return sorted;
   } catch (error) {
     console.error("[Places API] Error finding responders:", error);
-    console.log("[Places API] Using mock fallback data");
-    return getMockResponders(category, latitude, longitude, limit);
+    console.log("[Places API] Returning empty array to trigger Gemini web search");
+    return []; // Return empty so Gemini web search is triggered in routes.ts
   }
 }

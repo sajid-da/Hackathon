@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { categorizeEmergency } from "./gemini";
 import { findNearbyResponders } from "./places";
+import { searchRespondersWithGemini, getCityFromCoordinates } from "./gemini-search";
 import { insertUserSchema, insertAlertSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -88,7 +89,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Find nearby responders endpoint - uses Google Places API for real-world data
+  // Find nearby responders endpoint - uses Google Places API, then Gemini web search as fallback
   app.get("/api/emergency/responders", async (req, res) => {
     try {
       const { lat, lng, type } = req.query;
@@ -103,8 +104,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`[API] Finding ${category} responders near ${latitude}, ${longitude}`);
 
-      // Use Google Places API for real-world results
-      const placeResults = await findNearbyResponders(category, latitude, longitude, 3);
+      // Try Google Places API first
+      let placeResults = await findNearbyResponders(category, latitude, longitude, 3);
+
+      // If Places API failed or returned no results, use Gemini AI web search
+      if (placeResults.length === 0) {
+        console.log("[API] 🤖 Places API returned no results, using Gemini web search...");
+        
+        // Get city name from coordinates for better search
+        const cityName = await getCityFromCoordinates(latitude, longitude);
+        console.log(`[API] Searching for ${category} responders in ${cityName}`);
+        
+        const geminiResults = await searchRespondersWithGemini(
+          category, 
+          latitude, 
+          longitude, 
+          cityName,
+          3
+        );
+
+        if (geminiResults.length > 0) {
+          const responders = geminiResults.map((result, index) => ({
+            name: result.name,
+            address: result.address,
+            distance: result.distance || 0,
+            type: category,
+            placeId: `gemini-${index}`,
+            location: { lat: latitude, lng: longitude },
+            phone: result.phone,
+            rating: result.rating,
+            priority: index === 0 ? 1 : index + 1,
+            hours: result.hours || "Call for hours",
+          }));
+
+          console.log(`[API] ✅ Returning ${responders.length} responders from Gemini web search`);
+          return res.json(responders);
+        }
+      }
 
       const responders = placeResults.map((place, index) => ({
         name: place.name,
@@ -119,39 +155,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         hours: place.hours,
       }));
 
-      console.log(`[API] Returning ${responders.length} real-world responders`);
+      console.log(`[API] Returning ${responders.length} responders`);
       res.json(responders);
     } catch (error) {
       console.error("Responders error:", error);
-      
-      // Fallback to mock data if Places API fails
-      console.log("[API] Places API failed, falling back to mock data");
-      try {
-        const responderRecords = await storage.getRespondersByType(
-          (req.query.type as string) || "medical",
-          parseFloat(req.query.lat as string),
-          parseFloat(req.query.lng as string),
-          3
-        );
-
-        const responders = responderRecords.map((record, index) => ({
-          name: record.name,
-          address: record.address,
-          distance: record.distance,
-          type: record.type,
-          placeId: record.id,
-          location: record.location,
-          phone: record.phone,
-          rating: record.rating ? parseFloat(record.rating) : undefined,
-          priority: index === 0 ? 1 : index + 1,
-          hours: record.hours,
-        }));
-
-        res.json(responders);
-      } catch (fallbackError) {
-        console.error("Fallback error:", fallbackError);
-        res.status(500).json({ error: "Failed to find responders" });
-      }
+      res.status(500).json({ error: "Failed to find responders" });
     }
   });
 

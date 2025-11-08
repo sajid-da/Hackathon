@@ -6,9 +6,10 @@ ConnectAid AI is a next-generation emergency response platform that uses Google 
 ## Features
 - **AI-Powered Emergency Categorization**: Google Gemini 2.5 Flash analyzes emergency messages and categorizes them (medical, police, mental health, disaster, finance)
 - **Real-World Responder Search**: Google Places API integration for real nearby facilities (20km radius, India region bias)
-- **Intelligent Mock Fallback**: Comprehensive mock database with 15 Delhi-based responders (AIIMS, Safdarjung Hospital, Delhi Police, NIMHANS, NDRF, RBI Consumer Education, etc.) automatically used when Places API unavailable
-- **Accurate User Location**: Browser geolocation API gets real user location (defaults to Delhi if unavailable)
-- **Smart Responder Matching**: Finds 2-3 nearest facilities based on emergency type with Haversine distance calculation and priority messaging
+- **Gemini AI Web Search Fallback**: When Maps API unavailable, Gemini searches the web for REAL responders in user's actual city (Bangalore hospitals, Mumbai police, etc.) - NO mock Delhi data
+- **Accurate User Location**: Browser geolocation API gets real user location automatically on page load
+- **Smart Responder Matching**: Finds 2-3 nearest facilities based on emergency type with distance calculation and priority messaging
+- **Location-Based Results**: Responders always match user's actual city - if in Bangalore, shows Bangalore facilities; if in Mumbai, shows Mumbai facilities
 - **Government Warning System**: Official disclaimer on emergency page warning users this is government-affiliated and should only be used in real emergencies
 - **Clickable Emergency Type Buttons**: Landing page buttons (Medical, Police, Mental Health, Disaster, Finance) navigate to emergency page with pre-selected type
 - **Voice-First Interface**: Web Speech API for voice input and AI text-to-speech feedback with priority responder announcements
@@ -53,9 +54,10 @@ ConnectAid AI is a next-generation emergency response platform that uses Google 
 - `SESSION_SECRET` - Session secret for authentication
 
 ## Recent Changes (Latest First)
+- ✅ **Gemini AI Web Search Integration**: NEW! When Google Maps API unavailable, Gemini searches the web in real-time for actual emergency responders in user's city (finds real Bangalore hospitals if user in Bangalore, real Mumbai police if in Mumbai, etc.)
+- ✅ **Location-Aware City Detection**: Gemini detects user's city from coordinates (Bangalore, Mumbai, Chennai, etc.) and searches for responders there - NO more Delhi-only results
 - ✅ **Nearest Responder Alert System**: Clear visual alerts on the closest responder - pulsing "NEAREST RESPONDER" badge, red border with glow effect, highlighted distance in red, priority call button with 🚨 emoji, "Closest" tag
 - ✅ **Auto Location Detection**: Automatically requests user's geolocation on page load for accurate nearby responders (with user permission)
-- ✅ **Intelligent Mock Fallback System**: Automatic fallback to comprehensive mock responder database when Places API unavailable (15 Delhi-based facilities across all 5 emergency categories)
 - ✅ **Comprehensive Multilingual Support**: Full internationalization for all UI elements (English, Hindi, Kannada, Tamil, Telugu, Spanish) with automatic language detection from user message, all buttons, labels, messages, and dialogs adapt to detected language
 - ✅ **Enhanced Geolocation**: High-accuracy geolocation (enableHighAccuracy, 10s timeout) to detect actual user location (Bangalore, Delhi, Mumbai, etc.) with clear messaging if location services disabled
 - ✅ **Real-World Google Places API Integration**: Live Google Maps Places API for real emergency responders in India (20km radius, India region bias) with intelligent mock fallback
