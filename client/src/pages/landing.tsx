@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Heart, Shield, Brain, AlertTriangle } from "lucide-react";
+import { Heart, Shield, Brain, AlertTriangle, IndianRupee } from "lucide-react";
 import Header from "@/components/Header";
 
 export default function Landing() {
@@ -101,12 +101,16 @@ export default function Landing() {
           </motion.div>
 
           <motion.div
-            className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-24"
+            className="grid grid-cols-2 md:grid-cols-5 gap-6 mt-24"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.8 }}
           >
-            <div className="flex flex-col items-center gap-4 p-6 rounded-2xl bg-white/5 backdrop-blur-lg border border-white/10 hover-elevate">
+            <button
+              onClick={() => setLocation("/emergency?type=medical")}
+              className="flex flex-col items-center gap-4 p-6 rounded-2xl bg-white/5 backdrop-blur-lg border border-white/10 hover-elevate active-elevate-2 cursor-pointer transition-all"
+              data-testid="button-category-medical"
+            >
               <div className="w-16 h-16 rounded-full bg-medical/20 flex items-center justify-center">
                 <Heart className="w-8 h-8 text-medical" />
               </div>
@@ -116,9 +120,13 @@ export default function Landing() {
                   Instant hospital connection
                 </p>
               </div>
-            </div>
+            </button>
 
-            <div className="flex flex-col items-center gap-4 p-6 rounded-2xl bg-white/5 backdrop-blur-lg border border-white/10 hover-elevate">
+            <button
+              onClick={() => setLocation("/emergency?type=police")}
+              className="flex flex-col items-center gap-4 p-6 rounded-2xl bg-white/5 backdrop-blur-lg border border-white/10 hover-elevate active-elevate-2 cursor-pointer transition-all"
+              data-testid="button-category-police"
+            >
               <div className="w-16 h-16 rounded-full bg-police/20 flex items-center justify-center">
                 <Shield className="w-8 h-8 text-police" />
               </div>
@@ -128,9 +136,13 @@ export default function Landing() {
                   Security assistance
                 </p>
               </div>
-            </div>
+            </button>
 
-            <div className="flex flex-col items-center gap-4 p-6 rounded-2xl bg-white/5 backdrop-blur-lg border border-white/10 hover-elevate">
+            <button
+              onClick={() => setLocation("/emergency?type=mental_health")}
+              className="flex flex-col items-center gap-4 p-6 rounded-2xl bg-white/5 backdrop-blur-lg border border-white/10 hover-elevate active-elevate-2 cursor-pointer transition-all"
+              data-testid="button-category-mental"
+            >
               <div className="w-16 h-16 rounded-full bg-mental/20 flex items-center justify-center">
                 <Brain className="w-8 h-8 text-mental" />
               </div>
@@ -142,9 +154,13 @@ export default function Landing() {
                   Counseling support
                 </p>
               </div>
-            </div>
+            </button>
 
-            <div className="flex flex-col items-center gap-4 p-6 rounded-2xl bg-white/5 backdrop-blur-lg border border-white/10 hover-elevate">
+            <button
+              onClick={() => setLocation("/emergency?type=disaster")}
+              className="flex flex-col items-center gap-4 p-6 rounded-2xl bg-white/5 backdrop-blur-lg border border-white/10 hover-elevate active-elevate-2 cursor-pointer transition-all"
+              data-testid="button-category-disaster"
+            >
               <div className="w-16 h-16 rounded-full bg-disaster/20 flex items-center justify-center">
                 <AlertTriangle className="w-8 h-8 text-disaster" />
               </div>
@@ -154,7 +170,23 @@ export default function Landing() {
                   Emergency services
                 </p>
               </div>
-            </div>
+            </button>
+
+            <button
+              onClick={() => setLocation("/emergency?type=finance")}
+              className="flex flex-col items-center gap-4 p-6 rounded-2xl bg-white/5 backdrop-blur-lg border border-white/10 hover-elevate active-elevate-2 cursor-pointer transition-all"
+              data-testid="button-category-finance"
+            >
+              <div className="w-16 h-16 rounded-full bg-amber-500/20 flex items-center justify-center">
+                <IndianRupee className="w-8 h-8 text-amber-400" />
+              </div>
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-white">Finance</h3>
+                <p className="text-sm text-slate-400 mt-1">
+                  Financial emergency
+                </p>
+              </div>
+            </button>
           </motion.div>
 
           <motion.div

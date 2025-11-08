@@ -4,9 +4,12 @@
 ConnectAid AI is a next-generation emergency response platform that uses Google Gemini AI, Google Maps, and voice technology to connect people in distress with real responders in real-time.
 
 ## Features
-- **AI-Powered Emergency Categorization**: Google Gemini 2.5 Flash analyzes emergency messages and categorizes them (medical, police, mental health, disaster)
-- **Mock Responder Database**: Comprehensive mock database with 12+ responders (hospitals, police stations, mental health centers, disaster relief) with realistic locations
-- **Smart Responder Matching**: Finds 2-3 nearest facilities based on emergency type with distance calculation and priority messaging
+- **AI-Powered Emergency Categorization**: Google Gemini 2.5 Flash analyzes emergency messages and categorizes them (medical, police, mental health, disaster, finance)
+- **India-Specific Mock Responder Database**: Comprehensive mock database with 12+ Delhi-based responders (AIIMS, Safdarjung Hospital, Delhi Police, NIMHANS, NDRF, etc.) with accurate India locations
+- **Accurate User Location**: Browser geolocation API gets real user location (defaults to Delhi if unavailable)
+- **Smart Responder Matching**: Finds 2-3 nearest facilities based on emergency type with Haversine distance calculation and priority messaging
+- **Government Warning System**: Official disclaimer on emergency page warning users this is government-affiliated and should only be used in real emergencies
+- **Clickable Emergency Type Buttons**: Landing page buttons (Medical, Police, Mental Health, Disaster, Finance) navigate to emergency page with pre-selected type
 - **Voice-First Interface**: Web Speech API for voice input and AI text-to-speech feedback with priority responder announcements
 - **Multilingual Support**: AI detects language and responds in user's language with priority messaging translated
 - **User Authentication**: Login system with name, phone, and email for personalized emergency response
@@ -48,7 +51,12 @@ ConnectAid AI is a next-generation emergency response platform that uses Google 
 - `VITE_GOOGLE_MAPS_API_KEY` - Google Maps API key (with VITE_ prefix for frontend access)
 - `SESSION_SECRET` - Session secret for authentication
 
-## Recent Changes
+## Recent Changes (Latest First)
+- ✅ **India Localization**: Updated all mock responders to Delhi, India locations (AIIMS, Safdarjung, Delhi Police, etc.)
+- ✅ **Accurate Geolocation**: Browser geolocation API gets real user location (defaults to Delhi coordinates 28.6139, 77.2090)
+- ✅ **Government Warning**: Official disclaimer on emergency page with India emergency numbers (112, 100)
+- ✅ **Clickable Emergency Buttons**: Landing page category buttons (Medical, Police, Mental Health, Disaster, Finance) now clickable and navigate with pre-selected type
+- ✅ **Finance Category Added**: New Finance emergency category with Indian Rupee icon
 - ✅ Complete MVP implementation with all core features
 - ✅ Mock responder database with 12+ realistic emergency responders across all categories
 - ✅ Smart responder search returning 2-3 nearest facilities with distance calculation

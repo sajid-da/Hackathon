@@ -137,6 +137,33 @@ export class MemStorage implements IStorage {
         phone: "+91-11-2371-6441",
         rating: "4.6",
         hours: "24/7 Emergency Assistance"
+      },
+      {
+        name: "Reserve Bank of India - Consumer Education",
+        type: "finance",
+        address: "Sansad Marg, New Delhi, Delhi 110001",
+        location: { lat: 28.6139, lng: 77.2050 },
+        phone: "+91-11-2306-6000",
+        rating: "4.5",
+        hours: "Mon-Fri 10AM-5PM, Emergency Hotline 24/7"
+      },
+      {
+        name: "Delhi State Consumer Disputes Commission",
+        type: "finance",
+        address: "F-Block, Barkha Bhawan, Janakpuri, Delhi 110058",
+        location: { lat: 28.6217, lng: 77.0851 },
+        phone: "+91-11-2559-0103",
+        rating: "4.3",
+        hours: "Mon-Fri 10AM-5PM"
+      },
+      {
+        name: "National Financial Literacy Centre",
+        type: "finance",
+        address: "Nehru Place, New Delhi, Delhi 110019",
+        location: { lat: 28.5494, lng: 77.2501 },
+        phone: "+91-11-2623-4567",
+        rating: "4.4",
+        hours: "Mon-Sat 9AM-6PM, Crisis Hotline 24/7"
       }
     ];
 

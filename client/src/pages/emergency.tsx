@@ -15,6 +15,7 @@ import {
   Phone,
   Navigation,
   Loader2,
+  Shield,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { EmergencyCategorization, Responder } from "@shared/schema";
@@ -35,6 +36,27 @@ export default function Emergency() {
   } | null>(null);
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [recognition, setRecognition] = useState<any>(null);
+  const [preSelectedType, setPreSelectedType] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const typeParam = params.get('type');
+    if (typeParam) {
+      setPreSelectedType(typeParam);
+      const categoryNames: Record<string, string> = {
+        medical: "medical emergency",
+        police: "police assistance",
+        mental_health: "mental health support",
+        disaster: "disaster relief",
+        finance: "financial emergency"
+      };
+      const categoryName = categoryNames[typeParam] || "emergency";
+      toast({
+        title: `${categoryName.charAt(0).toUpperCase() + categoryName.slice(1)} selected`,
+        description: "Describe your situation below",
+      });
+    }
+  }, [toast]);
 
   useEffect(() => {
     if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
@@ -141,15 +163,15 @@ export default function Emergency() {
           setIsLoadingLocation(false);
           toast({
             title: "Location unavailable",
-            description: "Using default location",
+            description: "Using default location (Delhi)",
             variant: "destructive",
           });
-          setUserLocation({ lat: 37.7749, lng: -122.4194 });
+          setUserLocation({ lat: 28.6139, lng: 77.2090 });
         }
       );
     } else {
       setIsLoadingLocation(false);
-      setUserLocation({ lat: 37.7749, lng: -122.4194 });
+      setUserLocation({ lat: 28.6139, lng: 77.2090 });
     }
   };
 
@@ -182,7 +204,7 @@ export default function Emergency() {
       const data = await response.json();
       setCategorization(data);
 
-      const location = userLocation || { lat: 37.7749, lng: -122.4194 };
+      const location = userLocation || { lat: 28.6139, lng: 77.2090 };
       const respondersResponse = await fetch(
         `/api/emergency/responders?lat=${location.lat}&lng=${location.lng}&type=${data.category}`
       );
@@ -265,6 +287,8 @@ export default function Emergency() {
         return "bg-mental text-mental-foreground";
       case "disaster":
         return "bg-disaster text-disaster-foreground";
+      case "finance":
+        return "bg-amber-600 text-white";
       default:
         return "bg-primary text-primary-foreground";
     }
@@ -328,6 +352,24 @@ export default function Emergency() {
                   Speak or type to describe your emergency
                 </p>
               </div>
+
+              <Card className="p-6 mb-8 bg-red-950/50 backdrop-blur-lg border-red-800/50">
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
+                    <Shield className="w-6 h-6 text-red-400" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-bold text-red-300 mb-2">
+                      Official Government Emergency Service
+                    </h3>
+                    <p className="text-sm text-red-200/80 leading-relaxed">
+                      This is an official government-affiliated emergency response platform. 
+                      <strong className="text-red-100"> Use ONLY in real emergencies.</strong> Misuse of this service may result in legal consequences. 
+                      For life-threatening emergencies, always call <strong className="text-red-100">112 (India Emergency Number)</strong> or <strong className="text-red-100">100 (Police)</strong> immediately.
+                    </p>
+                  </div>
+                </div>
+              </Card>
 
               <Card className="p-8 bg-card/50 backdrop-blur-lg border-card-border">
                 <div className="space-y-6">

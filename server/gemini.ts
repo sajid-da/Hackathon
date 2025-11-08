@@ -24,6 +24,7 @@ Analyze the message and categorize it into one of these types:
 - police: Security threats, crimes, safety concerns
 - mental_health: Mental health crises, emotional distress
 - disaster: Natural disasters, large-scale emergencies
+- finance: Financial emergencies, fraud, debt crises, financial exploitation
 - general: Other emergencies
 
 Also determine severity (low, medium, high, critical) and suggest immediate action IN THE USER'S LANGUAGE.
@@ -37,7 +38,7 @@ LANGUAGE HANDLING:
 
 Respond with JSON matching this schema:
 {
-  "category": string (medical | police | mental_health | disaster | general),
+  "category": string (medical | police | mental_health | disaster | finance | general),
   "severity": string (low | medium | high | critical),
   "keywords": string[] (key terms from message in original language),
   "suggestedAction": string (immediate action IN THE USER'S LANGUAGE),
@@ -55,7 +56,7 @@ Respond with JSON matching this schema:
           properties: {
             category: {
               type: "string",
-              enum: ["medical", "police", "mental_health", "disaster", "general"],
+              enum: ["medical", "police", "mental_health", "disaster", "finance", "general"],
             },
             severity: {
               type: "string",
