@@ -20,7 +20,7 @@ The platform focuses on speed, accessibility, and clarity to guide users toward 
   - Police
   - Mental Health
   - Disaster
-  - Financial Emergency
+  - Financial Emergency and many more.
 - Designed to assist decision-making, not diagnosis
 
 ### Location-Based Responder Discovery
